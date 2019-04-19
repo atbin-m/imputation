@@ -34,7 +34,10 @@ data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
                              #"Tai(day)"
                             ],
         'PanelData':True,
-        'second_tower':'Gingin' #'TiTreeEast',
+        'second_tower':'Gingin', #'TiTreeEast',
+
+        'SOLO': True,
+        'path2solo': '/home/atbin/workd/SOLO/source'
        }
 
 # solvers

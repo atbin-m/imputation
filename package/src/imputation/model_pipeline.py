@@ -55,7 +55,9 @@ class ModelPipeline(object):
         f = panel_data.PanelData_fit(self.conf, self.df_imputed, 
                                      self.df_2nd_tower_imputed)
         f._iterate_over_train_test_sets()
-        
+
+    def solo_run(self):
+        pass
         
     def taylor_diagram(self):
         summary_df = self._read_summary_file()
@@ -128,6 +130,9 @@ if __name__=="__main__":
     if conf.data['PanelData']==True:
          p.imputation_run_sec_tower()
          p.panel_data_run()
+    if conf.data['SOLO'] == True:
+        p.solo_run()
+
     p.taylor_diagram()
 
     

@@ -1,0 +1,36 @@
+ 25
+ 100
+ 20
+ 0.01
+ 1111
+ /home/atbin/workd/imputation/package/data_in/sofm_sws_input.csv
+ /home/atbin/workd/imputation/package/data_in/som.o1
+ /home/atbin/workd/imputation/package/data_in/som.o2
+ /home/atbin/workd/imputation/package/data_in/som.o3
+ /home/atbin/workd/imputation/package/data_in/som.o4
+
+ 50
+ 0 1 2 3 15 50 75 100 125 150
+ 175 200 225 250 275 300 325 350 375 400
+ 425 450 475 500
+ 550 600 650 700 750 800
+ 850 900 950 1000 1050 1100 1150 1200 1250 1300
+ 1400 1500 1600 1700 1800
+ 2000 2500 3000 3500 3999
+
+
+INFORMATION:                                                              
+1)  Nnode: number of kohonon nodes=Nnode x Nnode                          
+2)  Ncyc: maximum number of iteration in training                         
+3)  Nwch: check weight changes and write to file in every Nwch iterations 
+4)  width: the width in weight space for the initial random weights       
+5)  Iseed: initial random seed for generating connection weights          
+6)  Input data file name and directory.                                   
+7)  Fout1: weight changes from iterations to iterations                   
+8)  Fout2: patterns generated from random genator                        
+9)  Fout3: weight matrix during specific training iterations              
+10) Fout4: print final sofm weights                                       
+11) Nwrite: a counter showing the number of print out of weights          
+           during the training process                                    
+12) Ncycle: a list of the iterations that you want to print out           
+           connection weights                                             

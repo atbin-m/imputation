@@ -156,8 +156,8 @@ def _minutes_in_year(t):
     return sinwt, coswt
 
 def data_preprocessing(data_config, vars_config, 
-                         data_in_path=None,
-                         data_out_path = None):
+                     data_in_path=None,
+                     data_out_path = None):
 
     primary_df = _primary_data_preprocessing(data_config, vars_config,
                                              data_in_path)

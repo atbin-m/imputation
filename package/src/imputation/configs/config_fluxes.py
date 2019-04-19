@@ -26,8 +26,12 @@ data = {'tower': 'Calperum',
                              #"Tai(day)"
                             ],
         'PanelData':False,
-        'second_tower':'Gingin' #'TiTreeEast',
-       }
+        'second_tower':'Gingin', #'TiTreeEast',
+
+        'SOLO': True,
+        'path2solo': '/home/atbin/workd/SOLO/source'
+
+        }
 
 # solvers
 solvers = ['Classical Linear',
