@@ -4,8 +4,7 @@ import logging
 logging.basicConfig(format="%(lineno)s:%(funcName)s:%(message)s", 
                     level=logging.INFO)
 
-def _train_test_split(df, config, begin_test_timestamp, deltat, 
-                      end_test_timestamp=None):
+def _train_test_split(df, config, begin_test_timestamp, deltat, end_test_timestamp, fbprophet):
     tvar = config.variables['tvar']
     yvar = config.variables['yvar']
 
@@ -20,14 +19,17 @@ def _train_test_split(df, config, begin_test_timestamp, deltat,
     end_train_timestamp = begin_test_timestamp
     train_set = df[df[tvar]< end_train_timestamp] #setting upper timelimit in train_set
 
-    # No. of days with fully or partially missing data
-    number_of_missing_days = train_set[train_set[yvar].isna()][tvar].map(lambda x: "%s-%s-%s"%(x.year, x.month, x.day) ).nunique()
+    if not fbprophet:
+        # No. of days with fully or partially missing data
+        number_of_missing_days = train_set[train_set[yvar].isna()][tvar].map(lambda x: "%s-%s-%s"%(x.year, x.month, x.day) ).nunique()
 
-    # to compensate this loss of data from the training set we need to extend 
-    # no. of days in training set
-    extended_deltat = deltat + number_of_missing_days
-    begin_train_timestamp = end_train_timestamp -\
-                            datetime.timedelta(extended_deltat)
+        # to compensate this loss of data from the training set we need to extend
+        # no. of days in training set
+        extended_deltat = deltat + number_of_missing_days
+        begin_train_timestamp = end_train_timestamp -\
+                                datetime.timedelta(extended_deltat)
+    else:
+        begin_train_timestamp = df[tvar].min()
 
     train_set = train_set[train_set[tvar]>= begin_train_timestamp]  #setting lower timelimit in train_set
 
@@ -42,7 +44,7 @@ def _train_test_split(df, config, begin_test_timestamp, deltat,
     return test_set, train_set, end_test_timestamp
     
 
-def groups_of_train_test_set(df, config):
+def groups_of_train_test_set(df, config, fbprophet=None):
     """
     Divides given dataframe into list of test and train sets, within 
     the time period of interest.
@@ -78,9 +80,10 @@ def groups_of_train_test_set(df, config):
             end_test_timestamp = None
 
         i_test_set, i_train_set, end_test_timestamp =\
-                              _train_test_split(df.copy(), config, 
-                                                begin_test_timestamp, 
-                                                deltat, end_test_timestamp)
+                              _train_test_split(df.copy(), config,
+                                                begin_test_timestamp,
+                                                deltat, end_test_timestamp,
+                                                fbprophet)
         begin_test_timestamp = end_test_timestamp
                  
         # Interpolating where x-var is nan.
@@ -97,13 +100,19 @@ def groups_of_train_test_set(df, config):
         else:
             test_df = pd.concat((test_df, i_test_set))
             train_df = pd.concat((train_df, i_train_set))
-            
+
     return test_df, train_df
 
-
 if __name__=="__main__":
+    import sys
+    sys.path.insert(0, 'configs/')
     import test_config as conf
-    
-       
-    df = pd.read_csv('../../data_out/Calperum_L3_processed.csv', parse_dates=['DateTime'])
-    test, train = groups_of_train_test_set(df, conf)
+    import pandas as pd
+
+    try:
+        df = pd.read_csv('../../data_out/Calperum_L3_processed.csv', parse_dates=['DateTime'])
+    except FileNotFoundError:
+        df = pd.read_csv('/media/atbin/Backup/Data_Processing/Package/data_out/Calperum_L3_processed.csv',
+                         parse_dates=['DateTime'])
+
+    test, train = groups_of_train_test_set(df, conf, fbprophet=True)

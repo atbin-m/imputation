@@ -4,9 +4,9 @@ timestamps = {'begin_date':'2013-07-01 00:00:00',
               'deltat':10}
 
 # variables
-variables = {'xvar': ['ACCESS_Sws_01', 
+variables = {'xvar': ['ACCESS_Ts_01',
                       #'AWS_Wd_0', 
-                      'BIOS2_Sws', 
+                      'BIOS2_Ts',
                       #'Swsi(day)',
                       #'sinwt',
                       #'coswt',
@@ -17,7 +17,7 @@ variables = {'xvar': ['ACCESS_Sws_01',
                       # 'BIOS2_Fn', 
                       # 'ACCESS_Ps_01'
                       ], 
-             'yvar': 'Sws',    # Driver name
+             'yvar': 'Ts',    # Driver name
              'tvar':'DateTime'
             } 
 
@@ -33,11 +33,13 @@ data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
                              #"Wsi(day)",
                              #"Tai(day)"
                             ],
-        'PanelData':True,
+        'PanelData':False,
         'second_tower':'Gingin', #'TiTreeEast',
 
-        'SOLO': True,
-        'path2solo': '/home/atbin/workd/SOLO/source'
+        'SOLO': False,
+        'path2solo': '/home/atbin/workd/SOLO/source',
+        
+        'fbprophet': True
        }
 
 # solvers
