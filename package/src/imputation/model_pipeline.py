@@ -5,6 +5,7 @@ import model_fit
 import panel_data
 import plot_utils
 import matplotlib.pyplot as plt
+import prophet
 
 class ModelPipeline(object):
     def __init__(self, conf):
@@ -58,7 +59,11 @@ class ModelPipeline(object):
 
     def solo_run(self):
         pass
-        
+
+    def fbprophet_run(self):
+        fb = prophet.FBprophet(self.conf, self.df_imputed)
+        fb._iterate_over_train_test_sets()
+
     def taylor_diagram(self):
         summary_df = self._read_summary_file()
 
@@ -107,21 +112,20 @@ if __name__=="__main__":
     sys.path.insert(0, 'configs')
     
     # ------- L3 --------------------------
-    """
     import test_config as conf
     importlib.reload(conf)
 
     p = ModelPipeline(conf)
     p.imputation_run()
-    if conf.data['PanelData']==True:
-         p.imputation_run_sec_tower()
-         p.panel_data_run()
+    # if conf.data['PanelData']==False:
+    #      p.imputation_run_sec_tower()
+    #      p.panel_data_run()
+    if conf.data['fbprophet'] == True:
+        p.fbprophet_run()
     p.taylor_diagram()
-    
-    """        
-    
+
     # ------- L4 --------------------------
-    
+    """
     import config_fluxes as conf
     importlib.reload(conf)
 
@@ -134,5 +138,5 @@ if __name__=="__main__":
         p.solo_run()
 
     p.taylor_diagram()
-
+    """
     

@@ -26,19 +26,124 @@ class FBprophet(object):
         self.set_ranks = self.test_df['Set_rank'].unique()
 
     def _solver(self, atrain, atest):
+        ttest_min = atest[self.tvar].min().strftime('%Y-%m-%d')
+        ttest_max = atest[self.tvar].max().strftime('%Y-%m-%d')
+
+        atrain = self._modify_column_header_(atrain)
 
         m = Prophet()
         m.fit(atrain)
 
-        future = m.make_future_dataframe(periods=self.deltat)
-        self.forecast = m.predict(future)
+        #future = m.make_future_dataframe(periods=self.deltat)
+        ytest, ds =  atest.reset_index()[self.yvar], atest[self.tvar].values
 
+        future = pd.DataFrame({'ds':ds})
+        self.forecast = m.predict(future)
+        ytest_predicted = self.forecast['yhat']
+
+        pred_stats = self._fit_stats(ytest, ytest_predicted)
+
+        asolver = 'fbprophet'
+        summary = {'Solver': asolver,
+                   'Best_params': np.nan,
+                   'RMSE': pred_stats['rmse'],
+                   'R2': pred_stats['r2'],
+                   'std': pred_stats['std'],
+                   'Corr.': pred_stats['corr'],
+                   'MBE': pred_stats['mbe'],
+                   'Test_begin': ttest_min,
+                   'Test_end': ttest_max,
+                   }
+
+        predicted_table = pd.DataFrame({self.tvar:ds,
+                                        self.yvar: ytest.values,
+                                        self.yvar + '_predicted_%s' % asolver: ytest_predicted,
+                                        self.yvar + '_imputed_%s' % asolver: np.nan})
+        return summary, predicted_table
+
+    def _modify_column_header_(self, tempdf):
+        return pd.DataFrame({'ds':tempdf[self.tvar], 'y':tempdf[self.yvar]})
 
     def _iterate_over_train_test_sets(self):
 
+        full_summary = []
+        full_predicted_table = {}
+
+        for set_rank in self.set_ranks:
+            atest = self.test_df.loc[self.test_df['Set_rank'] == set_rank]
+            atrain = self.train_df.loc[self.train_df['Set_rank'] == set_rank]
+
+            summary, predicted_table = self._solver(atrain, atest)
+            full_summary.append(summary)
+
+            if isinstance(full_predicted_table, dict):
+                full_predicted_table = predicted_table
+            else:
+                full_predicted_table = pd.concat((full_predicted_table,
+                                                  predicted_table))
+
+        self.full_summary = pd.DataFrame(full_summary)
+
+        self.full_summary.sort_values(['Test_begin', 'RMSE'],
+                                      ascending=[True, True], inplace=True)
+
+        if self.result['save_summary'] == True:
+            fn = self._save_summary()
+            self.full_summary.to_csv(fn, index=False)
+
+        if self.result['save_imputed'] == True:
+            self.imputed_df = self._merge_predicted_and_original_tables(full_predicted_table)
+
+            fn = self._save_predicted_table()
+            self.imputed_df.to_csv(fn, index=False)
+
+
+    def _fit_stats(self, ytest, ytest_predicted):
+        ytest_not_nan = ytest.values[~ytest.isna()]
+        ytest_predicted_not_nan = ytest_predicted[~ytest.isna()]
+
+        rmse, r2, mbe = utils.diagnostic_stats(ytest_not_nan, ytest_predicted_not_nan)
+        std = ytest_predicted_not_nan.std()
+        corr = np.corrcoef(ytest_not_nan, ytest_predicted_not_nan)[0, 1]
+        pred_stats = {'rmse': rmse,
+                      'r2': r2,
+                      'mbe': mbe,
+                      'std': std,
+                      'corr': corr}
+
+        return pred_stats
+
+    def _save_summary(self):
+        title = self.tower
+        fn = '../../data_out/' + title + '_summary_stats.csv'
+        return fn
+
+    def _save_predicted_table(self):
+        title = self.tower
+        yobs_file = self.yobs_file
+
+        fn = '../../data_out/' + title + '_' + yobs_file + '_imputed.csv'
+        return fn
+
+    def _merge_predicted_and_original_tables(self, impt_df):
+        original_df = pd.read_csv("../../data_out/" + self.tower + '_' +
+                                  self.yobs_file + '_processed.csv', parse_dates=['DateTime'])
+
+        pred_df = pd.merge(original_df, impt_df, on=self.tvar, how='left',
+                           suffixes=('', '_%s' % self.tower))
+
+        # Creating imputed df
+        asolver = 'fbprophet'
+        pred_df[self.yvar + '_imputed_%s' % asolver].fillna(pred_df[self.yvar], inplace=True)
+        pred_df[self.yvar + '_imputed_%s' % asolver].fillna(pred_df[self.yvar +
+                                                                    '_predicted_%s' % asolver],
+                                                            inplace=True)
+        return pred_df
 
 
 if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, 'configs/')
     import test_config as conf
     import importlib
 
@@ -51,4 +156,4 @@ if __name__ == "__main__":
                          parse_dates=['DateTime'])
 
     f = FBprophet(conf, df)
-    #f._iterate_over_train_test_sets()
+    f._iterate_over_train_test_sets()

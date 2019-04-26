@@ -39,7 +39,7 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
             
             temp_ds = nc_read.nc_read_series(data_in_path + file_head + i + '.nc',
                                              checktimestep=True,
-                                             fixtimestepmethod="r")
+                                             fixtimestepmethod="")
             if i=='ACCESS':
                 yvars = ['%s_00'%yvar, '%s_01'%yvar, '%s_02'%yvar, '%s_10'%yvar, 
                         '%s_11'%yvar, '%s_12'%yvar, '%s_20'%yvar, '%s_21'%yvar, 

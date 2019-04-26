@@ -1,6 +1,6 @@
 # train test time-stamps
 timestamps = {'begin_date':'2013-07-01 00:00:00', 
-              'end_date':'2013-09-12 23:59:59',
+              'end_date':'2013-08-01 23:59:59',
               'deltat':10}
 
 # variables
