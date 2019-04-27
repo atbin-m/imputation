@@ -231,13 +231,20 @@ class Model_runner(Model_fit):
                        on= self.tvar, how='left', 
                        suffixes=('', '_%s'%self.conf.data['tower']))
         
-        # Creating imputed df
+        # Creating imputed df by filling nan rows with original data
+        # and with prediction wherever gaps exist in the original data.
         for asolver in self.solver_names:
-            pred_df[self.yvar + '_imputed_%s'%asolver].fillna(
-                    pred_df[self.yvar], inplace=True)
-            pred_df[self.yvar + '_imputed_%s'%asolver].fillna(
-                    pred_df[self.yvar + '_predicted_%s'%asolver], inplace=True)
-        
+            # pred_df[self.yvar + '_imputed_%s'%asolver].fillna(
+            #         pred_df[self.yvar], inplace=True)
+            # pred_df[self.yvar + '_imputed_%s'%asolver].fillna(
+            #         pred_df[self.yvar + '_predicted_%s'%asolver], inplace=True)
+
+            mask = (pred_df[self.yvar + '_imputed_%s' % asolver].isna())
+            pred_df.loc[mask, self.yvar + '_imputed_%s' % asolver] = pred_df.loc[mask, self.yvar]
+            mask = (pred_df[self.yvar + '_imputed_%s' % asolver].isna())
+            pred_df.loc[mask, self.yvar + '_imputed_%s' % asolver] = pred_df.loc[mask,
+                                                                                 self.yvar + '_predicted_%s' % asolver]
+
         return pred_df
 
     def _make_taylor_diagram(self, samples,  refstd, srange, ttest_min):

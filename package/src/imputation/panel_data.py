@@ -175,12 +175,17 @@ class PanelData_fit(object):
                 
         # Creating imputed df
         for asolver in self.solver_names:
-            pred_df[self.yvar + '_imputed_%s_Panel Data'%asolver].fillna(
-                    pred_df[self.yvar], inplace=True)
-            pred_df[self.yvar + '_imputed_%s_Panel Data'%asolver].fillna(
-                    pred_df[self.yvar + '_predicted_%s_Panel Data'%asolver], 
-                    inplace=True)
-        
+            # pred_df[self.yvar + '_imputed_%s_Panel Data'%asolver].fillna(
+            #         pred_df[self.yvar], inplace=True)
+            # pred_df[self.yvar + '_imputed_%s_Panel Data'%asolver].fillna(
+            #         pred_df[self.yvar + '_predicted_%s_Panel Data'%asolver],
+            #         inplace=True)
+            mask = (pred_df[self.yvar + '_imputed_%s_Panel Data'%asolver].isna())
+            pred_df.loc[mask, self.yvar + '_imputed_%s_Panel Data'%asolver]  = pred_df.loc[mask, self.yvar]
+            mask = (pred_df[self.yvar + '_imputed_%s_Panel Data'%asolver].isna())
+            pred_df.loc[mask, self.yvar + '_imputed_%s_Panel Data'%asolver]  = pred_df.loc[mask,
+                                                                                self.yvar + '_predicted_%s_Panel Data' % asolver]
+
         return pred_df
 
 

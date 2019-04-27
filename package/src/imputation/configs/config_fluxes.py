@@ -28,17 +28,19 @@ data = {'tower': 'Calperum',
         'PanelData':False,
         'second_tower':'Gingin', #'TiTreeEast',
 
-        'SOLO': True,
-        'path2solo': '/home/atbin/workd/SOLO/source'
+        'SOLO': False,
+        'path2solo': '/home/atbin/workd/SOLO/source',
 
+       'fbprophet': True
         }
 
 # solvers
 solvers = ['Classical Linear',
-           'Random Forest',
-           'eXtreme Gradient Boost',
-           'Support Vector Regression',
-           'ridge'
+           # 'Random Forest',
+           # 'eXtreme Gradient Boost',
+           # 'Support Vector Regression',
+           # 'ridge'
+           #
            ]
 
 # saving results

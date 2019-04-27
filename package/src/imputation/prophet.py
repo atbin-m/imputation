@@ -82,21 +82,14 @@ class FBprophet(object):
                 full_predicted_table = pd.concat((full_predicted_table,
                                                   predicted_table))
 
-        self.full_summary = pd.DataFrame(full_summary)
-
-        self.full_summary.sort_values(['Test_begin', 'RMSE'],
-                                      ascending=[True, True], inplace=True)
+        full_summary = pd.DataFrame(full_summary)
 
         if self.result['save_summary'] == True:
-            fn = self._save_summary()
-            self.full_summary.to_csv(fn, index=False)
+            self._save_summary(full_summary)
 
         if self.result['save_imputed'] == True:
             self.imputed_df = self._merge_predicted_and_original_tables(full_predicted_table)
-
-            fn = self._save_predicted_table()
-            self.imputed_df.to_csv(fn, index=False)
-
+            self._save_predicted_table(self.imputed_df)
 
     def _fit_stats(self, ytest, ytest_predicted):
         ytest_not_nan = ytest.values[~ytest.isna()]
@@ -113,31 +106,44 @@ class FBprophet(object):
 
         return pred_stats
 
-    def _save_summary(self):
+    def _save_summary(self, full_summary_prophet):
+        # reading full summary of primary tower
         title = self.tower
         fn = '../../data_out/' + title + '_summary_stats.csv'
-        return fn
+        full_summary_ml = pd.read_csv(fn)
 
-    def _save_predicted_table(self):
+        self.full_summary = pd.concat((full_summary_ml,
+                                       full_summary_prophet))
+
+        self.full_summary.sort_values(['Test_begin', 'RMSE'],
+                                      ascending=[True, True], inplace=True)
+        self.full_summary.to_csv(fn, index=False)
+
+    def _save_predicted_table(self, imputed_df_prophet):
         title = self.tower
         yobs_file = self.yobs_file
 
         fn = '../../data_out/' + title + '_' + yobs_file + '_imputed.csv'
-        return fn
+
+        imputed_df_prophet.to_csv(fn, index=False)
 
     def _merge_predicted_and_original_tables(self, impt_df):
-        original_df = pd.read_csv("../../data_out/" + self.tower + '_' +
-                                  self.yobs_file + '_processed.csv', parse_dates=['DateTime'])
+        original_df = pd.read_csv("../../data_out/" +
+                                  self.tower + '_' + self.yobs_file + '_imputed.csv',
+                                  parse_dates=[self.tvar])
 
         pred_df = pd.merge(original_df, impt_df, on=self.tvar, how='left',
                            suffixes=('', '_%s' % self.tower))
 
         # Creating imputed df
         asolver = 'fbprophet'
-        pred_df[self.yvar + '_imputed_%s' % asolver].fillna(pred_df[self.yvar], inplace=True)
-        pred_df[self.yvar + '_imputed_%s' % asolver].fillna(pred_df[self.yvar +
-                                                                    '_predicted_%s' % asolver],
-                                                            inplace=True)
+
+        mask = (pred_df[self.yvar + '_imputed_%s'%asolver].isna())
+        pred_df.loc[mask, self.yvar + '_imputed_%s'%asolver]  = pred_df.loc[mask, self.yvar]
+        mask = (pred_df[self.yvar + '_imputed_%s'%asolver].isna())
+        pred_df.loc[mask, self.yvar + '_imputed_%s'%asolver]  = pred_df.loc[mask,
+                                                                            self.yvar + '_predicted_%s' % asolver]
+
         return pred_df
 
 

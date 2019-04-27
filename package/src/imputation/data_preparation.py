@@ -185,7 +185,25 @@ def data_preprocessing(data_config, vars_config,
         sinwt, coswt = _minutes_in_year(df[vars_config['tvar']])
         df['sinwt'] = sinwt
         df['coswt'] = coswt
-    
+
+    tfeatures = ['day', 'month', 'week', 'hour', 'minutes', 'dayofyear']
+    for t in tfeatures:
+        tvar = df[vars_config['tvar']]
+
+        if t in vars_config['xvar']:
+            if t=='day':
+                df[t] = tvar.dt.day
+            elif t=='dayofyear':
+                df[t] = tvar.dt.dayofyear
+            elif t=='month':
+                df[t] = tvar.dt.month
+            elif t=='week':
+                df[t] = tvar.dt.week
+            elif t=='hour':
+                df[t] = tvar.dt.hour
+            elif t=='minutes':
+                df[t] = tvar.dt.minute
+
     if not data_out_path:
         data_out_path = "../../data_out/"
 
@@ -199,7 +217,10 @@ def data_preprocessing(data_config, vars_config,
     
 
 if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, 'configs')
     import test_config
+
     import importlib
     importlib.reload(test_config)
     data_config, var_config =  test_config.data, test_config.variables

@@ -8,14 +8,15 @@ variables = {'xvar': ['ACCESS_Ts_01',
                       #'AWS_Wd_0', 
                       'BIOS2_Ts',
                       #'Swsi(day)',
-                      #'sinwt',
-                      #'coswt',
-                      # "Tai(day)", 
+                      # "Tai(day)",
                       # "RHi(day)", 
                       # "Wsi(day)", 
                       # 'AWS_Precip_1', 
                       # 'BIOS2_Fn', 
                       # 'ACCESS_Ps_01'
+                      #'sinwt',
+                      #'coswt',
+                      #'day', 'month', 'week', 'hour', 'minutes', 'dayofyear'
                       ], 
              'yvar': 'Ts',    # Driver name
              'tvar':'DateTime'
@@ -39,12 +40,12 @@ data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
         'SOLO': False,
         'path2solo': '/home/atbin/workd/SOLO/source',
         
-        'fbprophet': True
+        'fbprophet': False
        }
 
 # solvers
-solvers = ['Classical Linear',
-           #'Random Forest',
+solvers = [#'Classical Linear',
+           'Random Forest',
            #'eXtreme Gradient Boost',
            #'Support Vector Regression',
            #'ridge'

@@ -123,20 +123,24 @@ if __name__=="__main__":
     if conf.data['fbprophet'] == True:
         p.fbprophet_run()
     p.taylor_diagram()
-
     # ------- L4 --------------------------
+
     """
     import config_fluxes as conf
     importlib.reload(conf)
 
     p = ModelPipeline(conf)
     p.imputation_run()
+
     if conf.data['PanelData']==True:
          p.imputation_run_sec_tower()
          p.panel_data_run()
+
     if conf.data['SOLO'] == True:
         p.solo_run()
 
+    if conf.data['fbprophet'] == True:
+        p.fbprophet_run()
+
     p.taylor_diagram()
     """
-    

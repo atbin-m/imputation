@@ -29,8 +29,8 @@ def _train_test_split(df, config, begin_test_timestamp, deltat, end_test_timesta
         begin_train_timestamp = end_train_timestamp -\
                                 datetime.timedelta(extended_deltat)
     else:
-        #begin_train_timestamp = df[tvar].min()
-        begin_train_timestamp = datetime.datetime.strptime("2013-03-05 00:00:00", "%Y-%m-%d %H:%M:%S")
+        begin_train_timestamp = df[tvar].min()
+        #begin_train_timestamp = datetime.datetime.strptime("2013-03-05 00:00:00", "%Y-%m-%d %H:%M:%S")
 
     train_set = train_set[train_set[tvar]>= begin_train_timestamp]  #setting lower timelimit in train_set
 
