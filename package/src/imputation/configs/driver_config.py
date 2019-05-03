@@ -1,12 +1,12 @@
 # train test time-stamps
-timestamps = {'begin_date':'2013-07-01 00:00:00', 
-              'end_date':'2013-08-01 23:59:59',
-              'deltat':10}
+timestamps = {'begin_date':'2013-01-01 00:00:00',
+              'end_date':'2013-12-31 23:59:59',
+              'deltat':300}
 
 # variables
-variables = {'xvar': ['ACCESS_Ts_01',
-                      #'AWS_Wd_0', 
-                      'BIOS2_Ts',
+variables = {'xvar': ['ACCESS_Ah_01',
+                      #'AWS_Ah_1',
+                      'BIOS2_Ah',
                       #'Swsi(day)',
                       # "Tai(day)",
                       # "RHi(day)", 
@@ -18,8 +18,9 @@ variables = {'xvar': ['ACCESS_Ts_01',
                       #'coswt',
                       #'day', 'month', 'week', 'hour', 'minutes', 'dayofyear'
                       ], 
-             'yvar': 'Ts',    # Driver name
-             'tvar':'DateTime'
+             'yvar': 'Ah',    # Driver name
+             'tvar':'DateTime',
+             'xvar_derived': ['day', 'month', 'week', 'hour', 'minutes', 'dayofyear']
             } 
 
 # data
@@ -44,8 +45,8 @@ data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
        }
 
 # solvers
-solvers = [#'Classical Linear',
-           'Random Forest',
+solvers = ['Classical Linear',
+           #'Random Forest',
            #'eXtreme Gradient Boost',
            #'Support Vector Regression',
            #'ridge'

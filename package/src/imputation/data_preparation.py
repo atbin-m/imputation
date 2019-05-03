@@ -67,8 +67,8 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
         xvars = vars_config['xvar']
         
         for j in xvars:
-            df[j] = ds.series[j]['Data']        
-    
+            df[j] = ds.series[j]['Data']
+
     df.replace({-9999.0: np.nan}, inplace=True)    
     return df
 
@@ -181,28 +181,25 @@ def data_preprocessing(data_config, vars_config,
         
     yobs_file = data_config['yobs_file']
  
-    if 'sinwt' in vars_config['xvar']:
-        sinwt, coswt = _minutes_in_year(df[vars_config['tvar']])
-        df['sinwt'] = sinwt
-        df['coswt'] = coswt
-
-    tfeatures = ['day', 'month', 'week', 'hour', 'minutes', 'dayofyear']
+    tfeatures = vars_config['xvar_derived']
+    tvar = df[vars_config['tvar']]
     for t in tfeatures:
-        tvar = df[vars_config['tvar']]
-
-        if t in vars_config['xvar']:
-            if t=='day':
-                df[t] = tvar.dt.day
-            elif t=='dayofyear':
-                df[t] = tvar.dt.dayofyear
-            elif t=='month':
-                df[t] = tvar.dt.month
-            elif t=='week':
-                df[t] = tvar.dt.week
-            elif t=='hour':
-                df[t] = tvar.dt.hour
-            elif t=='minutes':
-                df[t] = tvar.dt.minute
+        if t=='day':
+            df[t] = tvar.dt.day
+        elif t=='dayofyear':
+            df[t] = tvar.dt.dayofyear
+        elif t=='month':
+            df[t] = tvar.dt.month
+        elif t=='week':
+            df[t] = tvar.dt.week
+        elif t=='hour':
+            df[t] = tvar.dt.hour
+        elif t=='minutes':
+            df[t] = tvar.dt.minute
+        elif t=='sinwt':
+            sinwt, coswt = _minutes_in_year(tvar)
+            df['sinwt'] = sinwt
+            df['coswt'] = coswt
 
     if not data_out_path:
         data_out_path = "../../data_out/"
@@ -212,17 +209,18 @@ def data_preprocessing(data_config, vars_config,
     
     logging.info("Processed file saved at : {}".format("../../data_out/" + 
                  data_config['tower'] + '_' + yobs_file + '_processed.csv'))
+
     return df
 
-    
 
 if __name__ == "__main__":
     import sys
     sys.path.insert(0, 'configs')
-    import test_config
+    import test_config as conf
+    #import config_fluxes as conf
 
     import importlib
-    importlib.reload(test_config)
-    data_config, var_config =  test_config.data, test_config.variables
+    importlib.reload(conf)
+    data_config, var_config =  conf.data, conf.variables
     
-    df = data_preprocessing(data_config, var_config)    
+    df = data_preprocessing(data_config, var_config)

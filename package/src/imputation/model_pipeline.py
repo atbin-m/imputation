@@ -94,7 +94,7 @@ class ModelPipeline(object):
         pass
     
     def _read_summary_file(self):
-        title = self.primary_st
+        title = self.primary_st + '_%s_'%self.conf.data['yobs_file']
         fn = '../../data_out/' + title + '_summary_stats.csv'
         full_summary = pd.read_csv(fn, parse_dates=['Test_begin', 'Test_end'])
         
@@ -110,11 +110,14 @@ if __name__=="__main__":
     import importlib
     import sys
     sys.path.insert(0, 'configs')
-    
-    # ------- L3 --------------------------
-    import test_config as conf
-    importlib.reload(conf)
 
+    # L3 config
+    #import driver_config as conf
+
+    #L4 config
+    import flux_config as conf
+
+    importlib.reload(conf)
     p = ModelPipeline(conf)
     p.imputation_run()
     # if conf.data['PanelData']==False:
@@ -123,24 +126,3 @@ if __name__=="__main__":
     if conf.data['fbprophet'] == True:
         p.fbprophet_run()
     p.taylor_diagram()
-    # ------- L4 --------------------------
-
-    """
-    import config_fluxes as conf
-    importlib.reload(conf)
-
-    p = ModelPipeline(conf)
-    p.imputation_run()
-
-    if conf.data['PanelData']==True:
-         p.imputation_run_sec_tower()
-         p.panel_data_run()
-
-    if conf.data['SOLO'] == True:
-        p.solo_run()
-
-    if conf.data['fbprophet'] == True:
-        p.fbprophet_run()
-
-    p.taylor_diagram()
-    """

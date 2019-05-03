@@ -123,7 +123,7 @@ class Model_runner(Model_fit):
     def __init__(self, config, test, train):
         self.conf = config
 
-        self.xvar = self.conf.variables['xvar']
+        self.xvar = self.conf.variables['xvar'] + self.conf.variables['xvar_derived']
         self.yvar = self.conf.variables['yvar']
         self.tvar = self.conf.variables['tvar']
         
@@ -210,7 +210,7 @@ class Model_runner(Model_fit):
 
             
     def _save_summary(self):
-        title = self.conf.data['tower']
+        title = self.conf.data['tower'] + '_%s_'%self.conf.data['yobs_file']
         fn = '../../data_out/' + title + '_summary_stats.csv'
         return fn
     

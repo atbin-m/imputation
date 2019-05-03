@@ -51,7 +51,7 @@ def groups_of_train_test_set(df, config, fbprophet=None):
     """
     
     tvar = config.variables['tvar']
-    xvar = config.variables['xvar']
+    xvar = config.variables['xvar'] + config.variables['xvar_derived']
     
     begin_date = config.timestamps['begin_date']
     end_date = config.timestamps['end_date']

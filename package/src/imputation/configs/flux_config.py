@@ -1,16 +1,24 @@
 # train test time-stamps
-timestamps = {'begin_date':'2013-04-01 00:00:00', 
-              'end_date':'2013-04-30 23:59:59',
-              'deltat':7}
+timestamps = {'begin_date':'2013-01-01 00:00:00',
+              'end_date':'2013-12-31 23:59:59',
+              'deltat':300}
 
 # variables
-variables = {'xvar': ['Fa', 
+variables = {'xvar': [#'Fa',
                       #'SHD', 
                       'Ta',
-                      'Ws'
+                      #'Ws'
+                      'Fg',
+                      'VPD',
+                      'Fn',
+                      'q',
+                      'Ts'
                       ], 
-             'yvar': 'Fh',    # Driver name
-             'tvar':'DateTime'
+             'yvar': 'Fc',    # Driver name
+             'tvar':'DateTime',
+             'xvar_derived': ['day', 'month', 'week', 'hour', 'minutes', 'dayofyear',
+                              #'sinwt', 'coswt'
+                              ]
             } 
 
 # data
@@ -31,16 +39,16 @@ data = {'tower': 'Calperum',
         'SOLO': False,
         'path2solo': '/home/atbin/workd/SOLO/source',
 
-       'fbprophet': True
+       'fbprophet': False
         }
 
 # solvers
 solvers = ['Classical Linear',
-           # 'Random Forest',
-           # 'eXtreme Gradient Boost',
-           # 'Support Vector Regression',
-           # 'ridge'
-           #
+            #'Random Forest',
+            #'eXtreme Gradient Boost',
+            #'Support Vector Regression',
+            #'ridge'
+
            ]
 
 # saving results
