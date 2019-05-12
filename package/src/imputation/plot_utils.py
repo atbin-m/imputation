@@ -5,10 +5,17 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 def plot_diagnostics(t, ytest, ypred, xtest, pred_stats, title):
+
+    # Droping not required xvars from the plots
+    try:
+        xtest.drop(['month', 'week', 'hour', 'minutes', 'dayofyear', 'day'], axis=1, inplace=True)
+    except KeyError:
+        pass
+
         
     rmse, r2, mbe = pred_stats
     
-    fig = plt.figure(figsize=(15,15))
+    fig = plt.figure(figsize=(15,15), dpi=150)
     fig.suptitle(title, size=15)
 
     gs = gridspec.GridSpec(4, 3)
@@ -204,7 +211,7 @@ def taylor_diagram(samples, refstd, srange, title):
     """
     samples = [ Solvers X 3]
     """
-    fig = plt.figure(figsize=(5,5))
+    fig = plt.figure(figsize=(8,8))
     fig.suptitle(title, size=12)
 
     # Taylor diagram

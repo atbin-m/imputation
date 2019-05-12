@@ -1,7 +1,7 @@
 # train test time-stamps
 timestamps = {'begin_date':'2013-01-01 00:00:00',
-              'end_date':'2013-12-31 23:59:59',
-              'deltat':300}
+              'end_date':'2013-02-01 23:59:59',
+              'deltat':20}
 
 # variables
 variables = {'xvar': ['ACCESS_Ah_01',
@@ -20,7 +20,7 @@ variables = {'xvar': ['ACCESS_Ah_01',
                       ], 
              'yvar': 'Ah',    # Driver name
              'tvar':'DateTime',
-             'xvar_derived': ['day', 'month', 'week', 'hour', 'minutes', 'dayofyear']
+             'xvar_derived': []#['day', 'month', 'week', 'hour', 'minutes', 'dayofyear']
             } 
 
 # data

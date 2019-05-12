@@ -78,6 +78,7 @@ def model(solver):
 
     elif solver=='rfr':
         parameters = {'max_depth':[5, 10, 15], 'n_estimators':[250, 500, 1000]}
+        #parameters = {'max_depth': [5], 'n_estimators': [250]}
         model = RandomForestRegressor(random_state=42)
 
     else:
