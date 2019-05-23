@@ -170,19 +170,19 @@ if __name__=="__main__":
     sys.path.insert(0, 'configs')
 
     # L3 config
-    import driver_config as confs
+    #import driver_config as confs
 
     #L4 config
-    #import flux_config as conf
+    import flux_config as confs
 
     importlib.reload(confs)
     p = ModelPipeline(confs)
     p.imputation_run()
-    # if conf.data['PanelData']==False:
-    #      p.imputation_run_sec_tower()
-    #      p.panel_data_run()
-    #if confs.data['fbprophet'] == True:
-    #    p.fbprophet_run()
+    if confs.data['PanelData']==True:
+          p.imputation_run_sec_tower()
+          p.panel_data_run()
+    if confs.data['fbprophet'] == True:
+        p.fbprophet_run()
 
-    #p.overall_rmse()
+    p.overall_rmse()
     p.taylor_diagram()

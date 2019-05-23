@@ -144,8 +144,12 @@ class PanelData_fit(object):
             
     def _save_summary(self, full_summary_sec_t):
         # reading full summary of primary tower
-        title = self.primary_st
-        fn = '../../data_out/' + title + '_summary_stats.csv'
+        # title = self.primary_st
+        # fn = '../../data_out/' + title + '_summary_stats.csv'
+
+        title = self.primary_st + '_%s_'%self.yobs_file
+        fn = '../../data_out/' + title + 'summary_stats.csv'
+
         full_summary_primary_t = pd.read_csv(fn)
 
         self.full_summary = pd.concat((full_summary_primary_t, 
@@ -156,11 +160,13 @@ class PanelData_fit(object):
         self.full_summary.to_csv(fn, index=False)    
     
     def _save_predicted_table(self, imputed_df_sec_t):
-        title = self.primary_st
-        yobs_file = self.yobs_file
-        
-        fn = '../../data_out/' + title + '_' + yobs_file + '_imputed.csv'
-        
+        # title = self.primary_st
+        # yobs_file = self.yobs_file
+        # fn = '../../data_out/' + title + '_' + yobs_file + '_imputed.csv'
+        #
+        title = self.primary_st + '_%s_'%self.yobs_file
+        fn = '../../data_out/' + title + 'imputed.csv'
+
         imputed_df_sec_t.to_csv(fn, index=False)
     
 
