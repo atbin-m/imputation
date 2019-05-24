@@ -81,14 +81,17 @@ class ModelPipeline(object):
         sample = a_summary_df[['std', 'Corr.', 'Solver']].values
         refstd = 0.75*sample[:,0].min()
         srange = (0, 1.5*sample[:,0].astype(float).max()/refstd)
-
+        
         ttest_min = pd.to_datetime(str(ttest_min)) 
         ttest_min =  ttest_min.strftime("%Y-%m-%d")
         
         title = self.primary_st + '_' +  ttest_min
         fn = '../../plot/' + title
 
-        plot_utils.taylor_diagram(sample, refstd, srange, title)
+        if np.isnan(refstd):
+            pass
+        else:
+            plot_utils.taylor_diagram(sample, refstd, srange, title)
 
         if self.conf.result['save_plots'] == True:
             plt.savefig(fn + '.jpeg')
@@ -113,7 +116,7 @@ class ModelPipeline(object):
                                     (imputed_df[tvar] >= begin_date)]
         return begin_date, end_date, imputed_df
 
-    def overall_rmse(self):
+    def overall_rmse(self, extra_solvers=None):
         yvar = self.conf.variables['yvar']
         tower = self.conf.data['tower']
         yvar_tower = yvar + '_' + tower
@@ -122,6 +125,10 @@ class ModelPipeline(object):
 
         ttest_min, ttest_max, imputed_df = self._read_imputed_file()
         solvers = self.conf.solvers
+        
+        if extra_solvers:
+            solvers  = solvers + extra_solvers
+            
         summaries = []
         for asolver in solvers:
             ytest_not_nan = imputed_df[yvar_tower].values[~imputed_df[yvar_tower].isna()]
@@ -178,11 +185,15 @@ if __name__=="__main__":
     importlib.reload(confs)
     p = ModelPipeline(confs)
     p.imputation_run()
+    
+    extra_solvers = []
     if confs.data['PanelData']==True:
           p.imputation_run_sec_tower()
           p.panel_data_run()
+          extra_solvers = extra_solvers + ['PanelData']
     if confs.data['fbprophet'] == True:
-        p.fbprophet_run()
+          p.fbprophet_run()
+          extra_solvers = extra_solvers + ['fbprohpet']
 
-    p.overall_rmse()
-    p.taylor_diagram()
+    p.overall_rmse(extra_solvers)
+p.taylor_diagram()

@@ -108,7 +108,7 @@ class FBprophet(object):
 
     def _save_summary(self, full_summary_prophet):
         # reading full summary of primary tower
-        title = self.tower
+        title = self.tower + '_' + self.yobs_file
         fn = '../../data_out/' + title + '_summary_stats.csv'
         full_summary_ml = pd.read_csv(fn)
 

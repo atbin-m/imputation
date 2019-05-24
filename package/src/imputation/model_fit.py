@@ -189,9 +189,14 @@ class Model_runner(Model_fit):
                         
             sample = pd.DataFrame(summaries)[['std', 'Corr.', 'Solver']].values
             refstd = atest[~atest[self.yvar].isna()][self.yvar].std()
-            srange = (0, 1.5*sample[:,0].astype(float).max()/refstd)
-            self._make_taylor_diagram(sample, refstd, srange, 
-                                      atest[self.tvar].min().strftime("%Y-%m-%d"))
+            
+            if np.isnan(refstd):
+                pass
+            else:
+                srange = (0, 1.5*sample[:,0].astype(float).max()/refstd)
+                        
+                self._make_taylor_diagram(sample, refstd, srange, 
+                                          atest[self.tvar].min().strftime("%Y-%m-%d"))
             
         self.full_summary = pd.DataFrame(full_summary)
         self.full_summary.sort_values(['Test_begin', 'RMSE'], 
