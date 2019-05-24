@@ -193,7 +193,7 @@ if __name__=="__main__":
           extra_solvers = extra_solvers + ['PanelData']
     if confs.data['fbprophet'] == True:
           p.fbprophet_run()
-          extra_solvers = extra_solvers + ['fbprohpet']
+          extra_solvers = extra_solvers + ['fbprophet']
 
     p.overall_rmse(extra_solvers)
 p.taylor_diagram()
