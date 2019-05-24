@@ -190,7 +190,7 @@ if __name__=="__main__":
     if confs.data['PanelData']==True:
           p.imputation_run_sec_tower()
           p.panel_data_run()
-          extra_solvers = extra_solvers + ['PanelData']
+          extra_solvers = extra_solvers + ['Random Forest_Panel Data']
     if confs.data['fbprophet'] == True:
           p.fbprophet_run()
           extra_solvers = extra_solvers + ['fbprophet']
