@@ -56,8 +56,18 @@ def groups_of_train_test_set(df, config, fbprophet=None):
     begin_date = config.timestamps['begin_date']
     end_date = config.timestamps['end_date']
     deltat =  config.timestamps['deltat']
+
     begin_date = datetime.datetime.strptime(begin_date, "%Y-%m-%d %H:%M:%S")
     end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+
+   
+    # Check if ustar threshold is provided for year of interest
+    if config.data['ustar']==True:
+        if not begin_date.year in config.data['ustar_map'].keys():
+            raise ValueError('{} is missing from config/data/ustar_map'.format(begin_date.year))
+        if not end_date.year in config.data['ustar_map'].keys():
+            raise ValueError('{} is missing from config/data/ustar_map'.format(end_date.year))
+
 
     if (end_date - begin_date).days < deltat:
         raise ValueError("Time difference in days between begin and end date" + 

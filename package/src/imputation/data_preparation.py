@@ -27,9 +27,30 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
     logging.info("Loading file: {}".format(data_in_path + file_head + 
                  yobs_file + ".nc"))
 
+   
+    #df = pd.DataFrame({yvar: ds.series[yvar]['Data'],
+    #                   tvar: ds.series[tvar]['Data']})
+    
     df = pd.DataFrame({yvar: ds.series[yvar]['Data'],
-                       tvar: ds.series[tvar]['Data']})
+                       tvar: ds.series[tvar]['Data'], 
+                       'ustar': ds.series['ustar']['Data']})
 
+    # Adding ustar_threshold information in the dataframe   
+    if data_config['ustar'] == True:        
+        df.ustar.replace({-9999.0: np.nan}, inplace=True)  
+                
+        for year, uvalue_threshold in data_config['ustar_map'].items():
+            year_cut = (df[tvar].dt.year == year) 
+            
+            ustar_exclude_hour = data_config['ustar_exclude_hour']
+            hour_cut = ((df[tvar].dt.hour > ustar_exclude_hour['end']) & 
+                        (df[tvar].dt.hour < ustar_exclude_hour['begin']))
+
+            ustar_cut = (df['ustar'] < uvalue_threshold)
+            
+            # Emptying yvar where yvar < ustar_threshold             
+            df.loc[ustar_cut & year_cut & ~hour_cut, yvar] = -9999.0
+            
     # Run when a list of ancillary files are provided
     if len(ancillary_files)>0:
             
@@ -70,6 +91,7 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
             df[j] = ds.series[j]['Data']
 
     df.replace({-9999.0: np.nan}, inplace=True)    
+
     return df
 
 def _climatology_data_preprocessing_single_sheet(data_config, sheet_name, 

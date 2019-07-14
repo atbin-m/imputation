@@ -1,22 +1,22 @@
 # train test time-stamps
 timestamps = {'begin_date':'2013-01-01 00:00:00',
-              'end_date':'2013-12-31 23:59:59',
-              'deltat':300}
+              'end_date':'2013-01-31 23:59:59',
+              'deltat':10}
 
 # variables
-variables = {'xvar': [#'Fa',
-                      #'SHD', 
+variables = {'xvar': ['Fa',
+                      'SHD', 
                       'Ta',
-                      #'Ws'
-                      'Fg',
-                      'VPD',
-                      'Fn',
-                      'q',
-                      'Ts'
+                      'Ws'
+                      #'Fg',
+                      #'VPD',
+                      #'Fn',
+                      #'q',
+                      #'Ts'
                       ], 
-             'yvar': 'Fc',    # Driver name
+             'yvar': 'Fe',    # Driver name
              'tvar':'DateTime',
-             'xvar_derived': ['day', 'month', 'week', 'hour', 'minutes', 'dayofyear',
+             'xvar_derived': [#'day', 'month', 'week', 'hour', 'minutes', 'dayofyear',
                               #'sinwt', 'coswt'
                               ]
             } 
@@ -26,6 +26,10 @@ data = {'tower': 'Calperum',
         'yobs_file': 'L4',
         'ancillary_files': [ ],
 
+        'ustar':True,
+        'ustar_map':{2013:0.23},
+        'ustar_exclude_hour':{'begin':18, 'end':7},
+
         'Climatology': False,
         'Climatology_xvars':['Swsi(day)'
                              #"Ahi(day)" 
@@ -34,7 +38,7 @@ data = {'tower': 'Calperum',
                              #"Tai(day)"
                             ],
         'PanelData':False,
-        'second_tower':'Gingin', #'TiTreeEast',
+        'second_tower':'Calperum', #'TiTreeEast',
 
         'SOLO': False,
         'path2solo': '/home/atbin/workd/SOLO/source',
@@ -46,8 +50,8 @@ data = {'tower': 'Calperum',
 solvers = ['Classical Linear',
             #'Random Forest',
             #'eXtreme Gradient Boost',
-            #'Support Vector Regression',
-            #'ridge'
+           # 'Support Vector Regression',
+           # 'ridge'
 
            ]
 
