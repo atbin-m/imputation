@@ -4,17 +4,17 @@ timestamps = {'begin_date':'2013-01-01 00:00:00',
               'deltat':10}
 
 # variables
-variables = {'xvar': ['Fa',
-                      'SHD', 
+variables = {'xvar': [#'Fa',
+                      #'SHD',
                       'Ta',
-                      'Ws'
-                      #'Fg',
-                      #'VPD',
-                      #'Fn',
-                      #'q',
-                      #'Ts'
+                      #'Ws'
+                      'Fg',
+                      'VPD',
+                      'Fn',
+                      'q',
+                      'Ts'
                       ], 
-             'yvar': 'Fe',    # Driver name
+             'yvar': 'Fc',    # Driver name
              'tvar':'DateTime',
              'xvar_derived': [#'day', 'month', 'week', 'hour', 'minutes', 'dayofyear',
                               #'sinwt', 'coswt'

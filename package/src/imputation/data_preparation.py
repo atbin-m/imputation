@@ -238,7 +238,8 @@ def data_preprocessing(data_config, vars_config,
 if __name__ == "__main__":
     import sys
     sys.path.insert(0, 'configs')
-    import test_config as conf
+    #import test_config as conf
+    import flux_config as conf
     #import config_fluxes as conf
 
     import importlib

@@ -109,3 +109,7 @@ venv.bak/
 *.xlsx
 *.xls
 *.out
+*.jpeg
+*.png
+*.xml
+*.iml

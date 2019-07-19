@@ -1,12 +1,12 @@
 # train test time-stamps
 timestamps = {'begin_date':'2013-01-01 00:00:00',
               'end_date':'2013-12-31 23:59:59',
-              'deltat':30}
+              'deltat':300}
 
 # variables
-variables = {'xvar': ['ACCESS_Ta_01',
-                      #'AWS_Ah_1',
-                      'BIOS2_Sws',
+variables = {'xvar': ['ACCESS_Ah_01',
+                      'AWS_Ah_1',
+                      'BIOS2_Ah',
                       #'Swsi(day)',
                       # "Tai(day)",
                       # "RHi(day)", 
@@ -18,7 +18,7 @@ variables = {'xvar': ['ACCESS_Ta_01',
                       #'coswt',
                       #'day', 'month', 'week', 'hour', 'minutes', 'dayofyear'
                       ], 
-             'yvar': 'Sws',    # Driver name
+             'yvar': 'Ah',    # Driver name
              'tvar':'DateTime',
              'xvar_derived': []#['day', 'month', 'week', 'hour', 'minutes', 'dayofyear']
             } 
@@ -26,7 +26,7 @@ variables = {'xvar': ['ACCESS_Ta_01',
 # data
 data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
         'yobs_file': 'L3',
-        'ancillary_files': ['ACCESS', 'BIOS2'], # 'AWS', 'BIOS2'
+        'ancillary_files': ['ACCESS', 'BIOS2', 'AWS'], # 'AWS', 'BIOS2'
 
         'ustar':False,
         'ustar_map':{2013:0.23},
@@ -50,9 +50,9 @@ data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
 
 # solvers
 solvers = ['Classical Linear',
-           #'Random Forest',
+           'Random Forest',
            #'eXtreme Gradient Boost',
-           #'Support Vector Regression',
+           'Support Vector Regression',
            'ridge'
            ]
 

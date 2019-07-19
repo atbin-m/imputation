@@ -32,12 +32,12 @@ def plot_diagnostics(t, ytest, ypred, xtest, pred_stats, title):
 
     # Plotting top 3 rows
     ax1.plot(t, ytest, lw=2., color='C0', label='Observed')
-    ax1.set_xlim(t.min(), t.max())
+    #ax1.set_xlim(t.min(), t.max())
     ax1.legend()
 
     for col in xtest.iteritems():
         ax2.plot(t, col[1], label = col[0])
-    ax2.set_xlim(t.min(), t.max())
+    #ax2.set_xlim(t.min(), t.max())
     ax2.legend(ncol=3)
 
     ax3.plot(t, ytest, lw=2., color='C0', label='Observed')

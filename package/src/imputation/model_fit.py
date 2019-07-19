@@ -105,7 +105,7 @@ class Model_fit(object):
                                              title)
         if config.result['save_plots'] == True:
             filepath = '../../plot/'
-            plt.savefig(filepath + title + '.jpeg')
+            plt.savefig(filepath + title + '.png')
             plt.close()
         return fig
 
@@ -260,7 +260,7 @@ class Model_runner(Model_fit):
         plot_utils.taylor_diagram(samples,  refstd, srange, title)    
 
         if self.conf.result['save_plots'] == True:
-            plt.savefig(fn + '.jpeg')
+            plt.savefig(fn + '.png')
             plt.close()
     
     

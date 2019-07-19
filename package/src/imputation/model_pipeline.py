@@ -94,7 +94,7 @@ class ModelPipeline(object):
             plot_utils.taylor_diagram(sample, refstd, srange, title)
 
         if self.conf.result['save_plots'] == True:
-            plt.savefig(fn + '.jpeg')
+            plt.savefig(fn + '.png')
             plt.close()
 
     def _read_summary_file(self):
