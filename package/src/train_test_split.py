@@ -11,7 +11,7 @@ def _train_test_split(df, config, begin_test_timestamp, deltat, end_test_timesta
     # Test set   
     if end_test_timestamp is None:
         end_test_timestamp = begin_test_timestamp + datetime.timedelta(deltat)
-        
+  
     test_set = df[(df[tvar]>= begin_test_timestamp) &
                   (df[tvar]< end_test_timestamp)]
 
@@ -34,6 +34,7 @@ def _train_test_split(df, config, begin_test_timestamp, deltat, end_test_timesta
 
     train_set = train_set[train_set[tvar]>= begin_train_timestamp]  #setting lower timelimit in train_set
 
+    
     logging.info("Train set Start: {} End: {}".format(train_set[tvar].min().strftime("%Y-%m-%d"),
                                                          train_set[tvar].max().strftime("%Y-%m-%d")))
     logging.info("Test set Start: {} End: {}".format(test_set[tvar].min().strftime("%Y-%m-%d"),
@@ -49,7 +50,7 @@ def groups_of_train_test_set(df, config, fbprophet=None):
     Divides given dataframe into list of test and train sets, within 
     the time period of interest.
     """
-    
+   
     tvar = config.variables['tvar']
     xvar = config.variables['xvar'] + config.variables['xvar_derived']
     
@@ -73,7 +74,7 @@ def groups_of_train_test_set(df, config, fbprophet=None):
         raise ValueError("Time difference in days between begin and end date" + 
                          "must be greater than deltat.")
 
-    
+   
     df = df.loc[df[tvar] <= end_date]
 
     number_of_train_test_sets = int((end_date - begin_date).total_seconds()/\
@@ -81,6 +82,7 @@ def groups_of_train_test_set(df, config, fbprophet=None):
 
     begin_test_timestamp = begin_date
     
+
     test_df = []
     train_df = []    
     for i in range(number_of_train_test_sets):
@@ -88,6 +90,7 @@ def groups_of_train_test_set(df, config, fbprophet=None):
             end_test_timestamp = end_date
         else:
             end_test_timestamp = None
+
 
         i_test_set, i_train_set, end_test_timestamp =\
                               _train_test_split(df.copy(), config,

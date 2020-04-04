@@ -15,13 +15,23 @@ class ModelPipeline(object):
         self.conf = configuration
         self.primary_st = self.conf.data['tower']
         
-    def imputation_run(self):
+    def imputation_run(self, timeofday=None):
         # ------- Configs
         data_config, var_config =  self.conf.data, self.conf.variables
         print('Imputing tower: {}'.format(self.conf.data['tower']))        
         # ------ Data Preprocessing
         df = data_preparation.data_preprocessing(data_config, var_config)
-
+        
+        
+        if timeofday=='night':
+            cut = ((df['DateTime'].dt.hour > 18) | (df['DateTime'].dt.hour <= 7))
+            df = df[cut].copy()
+        elif timeofday=='day':
+            cut = ((df['DateTime'].dt.hour > 7) & (df['DateTime'].dt.hour <= 18))
+            df = df[cut].copy()           
+        else:
+            pass
+                    
         # ------ Train test split
         test_df, train_df = groups_of_train_test_set(df, self.conf)
 
@@ -98,13 +108,15 @@ class ModelPipeline(object):
             plt.close()
 
     def _read_summary_file(self):
-        title = self.primary_st + '_%s_'%self.conf.data['yobs_file']
-        fn = '../../data_out/' + title + 'summary_stats.csv'
+        title = self.primary_st + '_%s'%self.conf.data['yobs_file'] + \
+                                  self.conf.data['file_suffix']  
+        fn = '../../data_out/' + title + '_summary_stats.csv'
         full_summary = pd.read_csv(fn, parse_dates=['Test_begin', 'Test_end'])
         return full_summary, fn
 
     def _read_imputed_file(self):
-        title = self.primary_st + '_%s'%self.conf.data['yobs_file']
+        title = self.primary_st + '_%s'%self.conf.data['yobs_file'] + \
+                                  self.conf.data['file_suffix']
         fn = '../../data_out/' + title + '_imputed.csv'
 
         tvar = self.conf.variables['tvar']
@@ -181,10 +193,11 @@ if __name__=="__main__":
 
     #L4 config
     import flux_config as confs
-
+    
+    # --------------- full run --------------------------
     importlib.reload(confs)
     p = ModelPipeline(confs)
-    p.imputation_run()
+    p.imputation_run(timeofday=None)
     
     extra_solvers = []
     if confs.data['PanelData']==True:
@@ -196,4 +209,41 @@ if __name__=="__main__":
           extra_solvers = extra_solvers + ['fbprophet']
 
     p.overall_rmse(extra_solvers)
-p.taylor_diagram()
+    p.taylor_diagram()
+    
+    
+    # --------------- day run --------------------------
+    importlib.reload(confs)
+    confs.data['file_suffix'] = '_day'
+    p = ModelPipeline(confs)
+    p.imputation_run(timeofday='day')
+    
+    extra_solvers = []
+    if confs.data['PanelData']==True:
+          p.imputation_run_sec_tower()
+          p.panel_data_run()
+          extra_solvers = extra_solvers + ['Random Forest_Panel Data']
+    if confs.data['fbprophet'] == True:
+          p.fbprophet_run()
+          extra_solvers = extra_solvers + ['fbprophet']
+
+    p.overall_rmse(extra_solvers)
+    p.taylor_diagram()
+        
+    # --------------- night run --------------------------
+    importlib.reload(confs)
+    confs.data['file_suffix'] = '_night'
+    p = ModelPipeline(confs)
+    p.imputation_run(timeofday='night')
+    
+    extra_solvers = []
+    if confs.data['PanelData']==True:
+          p.imputation_run_sec_tower()
+          p.panel_data_run()
+          extra_solvers = extra_solvers + ['Random Forest_Panel Data']
+    if confs.data['fbprophet'] == True:
+          p.fbprophet_run()
+          extra_solvers = extra_solvers + ['fbprophet']
+
+    p.overall_rmse(extra_solvers)
+    p.taylor_diagram()

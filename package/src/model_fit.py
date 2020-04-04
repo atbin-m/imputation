@@ -9,7 +9,6 @@ logging.basicConfig(format="%(lineno)s:%(funcName)s:%(message)s",
 import plot_utils
 import matplotlib.pyplot as plt
 
-
 class Model_fit(object):
     def __init__(self, solver_name, ytrain, xtrain, ytest, xtest, ttest):
         self.solver_name = solver_name
@@ -24,7 +23,7 @@ class Model_fit(object):
         
     def model_fit(self):
         
-        logging.info("Solver in use: {}".format(self.solver_name))    
+        logging.info("----------------------------------> Solver in use: {}".format(self.solver_name))    
         logging.info("Time window: {} to {}".format(self.ttest_min, 
                                                  self.ttest_max))    
         
@@ -32,17 +31,27 @@ class Model_fit(object):
         model, scale_data = lm.model(self.solver_name)
         
         # Scaling features if required
+        #if scale_data==True:
+        #    scaler = preprocessing.MinMaxScaler( )
+        #    ytrain_processed =\
+        #                scaler.fit_transform(self.ytrain.values.reshape(-1,1))       
+        #    ytrain_processed = ytrain_processed.squeeze()
+        #else:
+        #    ytrain_processed, ytest_processed = self.ytrain, self.ytest
+ 
+       # Scaling features if required
         if scale_data==True:
-            scaler = preprocessing.MinMaxScaler( )
-            ytrain_processed =\
-                        scaler.fit_transform(self.ytrain.values.reshape(-1,1))       
-            ytrain_processed = ytrain_processed.squeeze()
+            scaler_train = self._feature_scaler()
+            xtrain_processed = scaler_train.fit_transform(self.xtrain) 
+                        
+            scaler_test = self._feature_scaler()
+            xtest_processed = scaler_test.fit_transform(self.xtest)       
         else:
-            ytrain_processed, ytest_processed = self.ytrain, self.ytest
+            xtrain_processed, xtest_processed = self.xtrain, self.xtest
     
         
         # Fitting
-        yfit = model.fit(self.xtrain, ytrain_processed)
+        model.fit(xtrain_processed, self.ytrain)
     
         print("{}: Best parameters set:".format(self.solver_name))
         print(model.best_params_)
@@ -51,15 +60,8 @@ class Model_fit(object):
         self.best_hyper_params = str(model.best_params_)
     
         # Prdiction based on fitted model
-        ytest_predicted_temp = model.best_estimator_.predict(self.xtest)
+        self.ytest_predicted = model.best_estimator_.predict(xtest_processed)
     
-        # Inverse scaling the features
-        if scale_data==True:                
-            ytest_predicted =\
-                  scaler.inverse_transform(ytest_predicted_temp.reshape(-1,1))
-            self.ytest_predicted = ytest_predicted.squeeze()
-        else:
-            self.ytest_predicted = ytest_predicted_temp
             
     def fit_stats(self):
         ytest_not_nan = self.ytest.values[~self.ytest.isna()]
@@ -115,7 +117,13 @@ class Model_fit(object):
                         "_%s"%self.ttest_min
         
         return title
+       
+    def _feature_scaler(self):
+        #scaler = preprocessing.MinMaxScaler( )
+        scaler = preprocessing.StandardScaler()
         
+        return scaler
+
 class Model_runner(Model_fit):
     """
     Fits model for all train/test pairs for all solvers.
@@ -201,7 +209,6 @@ class Model_runner(Model_fit):
         self.full_summary = pd.DataFrame(full_summary)
         self.full_summary.sort_values(['Test_begin', 'RMSE'], 
                                       ascending=[True, True], inplace=True)
-        
         if self.conf.result['save_summary']==True:        
             fn = self._save_summary()
             self.full_summary.to_csv(fn, index=False)
@@ -215,21 +222,25 @@ class Model_runner(Model_fit):
 
             
     def _save_summary(self):
-        title = self.conf.data['tower'] + '_%s_'%self.conf.data['yobs_file']
-        fn = '../../data_out/' + title + 'summary_stats.csv'
+        title = self.conf.data['tower'] +\
+                '_%s'%self.conf.data['yobs_file'] + \
+                 self.conf.data['file_suffix']
+                 
+        fn = '../../data_out/' + title + '_summary_stats.csv'
         return fn
     
     def _save_predicted_table(self):
         title = self.conf.data['tower']
         yobs_file = self.conf.data['yobs_file']
         
-        fn = '../../data_out/' + title + '_' + yobs_file + '_imputed.csv'
+        fn = '../../data_out/' + title + '_' + yobs_file + \
+        self.conf.data['file_suffix'] + '_imputed.csv'
         return fn
     
     def _merge_predicted_and_original_tables(self, impt_df):
         original_df = pd.read_csv("../../data_out/" + 
-                                  self.conf.data['tower'] + '_' + 
-                                  self.conf.data['yobs_file'] +
+                                  self.conf.data['tower']  + '_' + \
+                                  self.conf.data['yobs_file'] +\
                                  '_processed.csv', parse_dates=['DateTime'])
         
         pred_df =  pd.merge(original_df, impt_df, 

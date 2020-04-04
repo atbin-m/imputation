@@ -5,6 +5,7 @@ timestamps = {'begin_date':'2013-01-01 00:00:00',
 
 # variables
 variables = {'xvar': ['ACCESS_Ah_01',
+                                   
                       'AWS_Ah_1',
                       'BIOS2_Ah',
                       #'Swsi(day)',
@@ -24,7 +25,7 @@ variables = {'xvar': ['ACCESS_Ah_01',
             } 
 
 # data
-data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
+data = {'tower': 'AliceSpringsMulga', #'TiTreeEast', #'AliceSpringsMulga', #
         'yobs_file': 'L3',
         'ancillary_files': ['ACCESS', 'BIOS2', 'AWS'], # 'AWS', 'BIOS2'
 
@@ -40,20 +41,25 @@ data = {'tower': 'Calperum', #'TiTreeEast', #'AliceSpringsMulga', #
                              #"Tai(day)"
                             ],
         'PanelData':False,
-        'second_tower':'Gingin', #'TiTreeEast',
+        'second_tower':'Calperum', #'TiTreeEast',
 
         'SOLO': False,
         'path2solo': '/home/atbin/workd/SOLO/source',
         
-        'fbprophet': False
+        'fbprophet': True
        }
 
 # solvers
 solvers = ['Classical Linear',
            'Random Forest',
-           #'eXtreme Gradient Boost',
+           'eXtreme Gradient Boost',
            'Support Vector Regression',
-           'ridge'
+           #'ridge',
+           'ANN',
+           #'Gradient Boost Regression',
+           'bayes_ridge',
+           #'lasso',
+           'elasticnet'
            ]
 
 # saving results

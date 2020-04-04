@@ -164,6 +164,7 @@ def _climatology_data_preprocessing_all_sheets(data_config):
 
 def _minutes_in_year(t):
     # First day of the year
+        
     fday = pd.to_datetime(t.dt.strftime('%Y'))
     tdiff_in_minutes = (t-fday).astype('timedelta64[m]')
     
@@ -177,6 +178,20 @@ def _minutes_in_year(t):
     
     return sinwt, coswt
 
+def _minutes_in_day(t):
+
+    minutes_lapsed = t.dt.hour*60 + t.dt.minute
+
+    minutes_in_day = 24*60.
+        
+    theta = 2*np.pi*(minutes_lapsed/minutes_in_day)
+    
+    sinwt = np.sin(theta)
+    coswt = np.cos(theta)
+    
+    return sinwt, coswt
+
+    
 def data_preprocessing(data_config, vars_config, 
                      data_in_path=None,
                      data_out_path = None):
@@ -184,7 +199,8 @@ def data_preprocessing(data_config, vars_config,
     primary_df = _primary_data_preprocessing(data_config, vars_config,
                                              data_in_path)
 
-    climatology = data_config['Climatology']
+    climatology = data_config['Climatology']    
+    
     if climatology == True:
         climatology_df = _climatology_data_preprocessing_all_sheets(data_config,
                                                                     data_in_path)
@@ -219,18 +235,21 @@ def data_preprocessing(data_config, vars_config,
         elif t=='minutes':
             df[t] = tvar.dt.minute
         elif t=='sinwt':
-            sinwt, coswt = _minutes_in_year(tvar)
+            #sinwt, coswt = _minutes_in_year(tvar)
+            sinwt, coswt = _minutes_in_day(tvar)
             df['sinwt'] = sinwt
             df['coswt'] = coswt
 
     if not data_out_path:
         data_out_path = "../../data_out/"
 
-    df.to_csv(data_out_path + data_config['tower'] + '_' + yobs_file +
+    df.to_csv(data_out_path + data_config['tower'] + '_' + yobs_file + 
+              data_config['file_suffix'] + 
               '_processed.csv', index=False)
     
     logging.info("Processed file saved at : {}".format("../../data_out/" + 
-                 data_config['tower'] + '_' + yobs_file + '_processed.csv'))
+                 data_config['tower'] + '_' + yobs_file +  
+                 data_config['file_suffix'] + '_processed.csv'))
 
     return df
 
