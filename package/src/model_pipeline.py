@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import prophet
 import numpy as np
 
-
 class ModelPipeline(object):
     def __init__(self, configuration):
         self.conf = configuration
@@ -20,9 +19,11 @@ class ModelPipeline(object):
         data_config, var_config =  self.conf.data, self.conf.variables
         print('Imputing tower: {}'.format(self.conf.data['tower']))        
         # ------ Data Preprocessing
-        df = data_preparation.data_preprocessing(data_config, var_config)
-        
-        
+        print("Data preprocessing: start")
+        #df = data_preparation.data_preprocessing(data_config, var_config)
+        df = pd.read_csv('data_out/Calperum_L4_processed.csv', parse_dates=['DateTime'])
+        print("Data preprocessing: end")
+
         if timeofday=='night':
             cut = ((df['DateTime'].dt.hour > 18) | (df['DateTime'].dt.hour <= 7))
             df = df[cut].copy()
@@ -65,7 +66,6 @@ class ModelPipeline(object):
         self.conf.data['tower'] = self.primary_st
         
     def panel_data_run(self):
-        
         f = panel_data.PanelData_fit(self.conf, self.df_imputed, 
                                      self.df_2nd_tower_imputed)
         f._iterate_over_train_test_sets()
@@ -77,9 +77,11 @@ class ModelPipeline(object):
         fb = prophet.FBprophet(self.conf, self.df_imputed)
         fb._iterate_over_train_test_sets()
 
+    def lstm_run(self):
+        pass
+
     def taylor_diagram(self):
         summary_df, _ = self._read_summary_file()
-
         ttest_min_set = summary_df['Test_begin'].unique()
 
         for t in ttest_min_set:
@@ -87,16 +89,15 @@ class ModelPipeline(object):
             self._make_save_taylor_diagram(a_summary_df, t)        
 
     def _make_save_taylor_diagram(self, a_summary_df, ttest_min):
-        
         sample = a_summary_df[['std', 'Corr.', 'Solver']].values
         refstd = 0.75*sample[:,0].min()
         srange = (0, 1.5*sample[:,0].astype(float).max()/refstd)
         
         ttest_min = pd.to_datetime(str(ttest_min)) 
-        ttest_min =  ttest_min.strftime("%Y-%m-%d")
+        ttest_min = ttest_min.strftime("%Y-%m-%d")
         
         title = self.primary_st + '_' +  ttest_min
-        fn = '../../plot/' + title
+        fn = 'plot/' + title
 
         if np.isnan(refstd):
             pass
@@ -110,14 +111,14 @@ class ModelPipeline(object):
     def _read_summary_file(self):
         title = self.primary_st + '_%s'%self.conf.data['yobs_file'] + \
                                   self.conf.data['file_suffix']  
-        fn = '../../data_out/' + title + '_summary_stats.csv'
+        fn = 'data_out/' + title + '_summary_stats.csv'
         full_summary = pd.read_csv(fn, parse_dates=['Test_begin', 'Test_end'])
         return full_summary, fn
 
     def _read_imputed_file(self):
         title = self.primary_st + '_%s'%self.conf.data['yobs_file'] + \
                                   self.conf.data['file_suffix']
-        fn = '../../data_out/' + title + '_imputed.csv'
+        fn = 'data_out/' + title + '_imputed.csv'
 
         tvar = self.conf.variables['tvar']
         begin_date = self.conf.timestamps['begin_date']
@@ -186,9 +187,9 @@ if __name__=="__main__":
     """
     import importlib
     import sys
-    sys.path.insert(0, 'configs')
+    sys.path.insert(0, 'configs/')
 
-    # L3 config
+    # L3 configy
     #import driver_config as confs
 
     #L4 config
@@ -210,8 +211,8 @@ if __name__=="__main__":
 
     p.overall_rmse(extra_solvers)
     p.taylor_diagram()
-    
-    
+
+    """
     # --------------- day run --------------------------
     importlib.reload(confs)
     confs.data['file_suffix'] = '_day'
@@ -247,3 +248,4 @@ if __name__=="__main__":
 
     p.overall_rmse(extra_solvers)
     p.taylor_diagram()
+    """

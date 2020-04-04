@@ -1,7 +1,7 @@
 # train test time-stamps
 timestamps = {'begin_date':'2013-03-03 00:00:00',
               'end_date':'2013-05-31 23:30:00',
-              'deltat':20}
+              'deltat':40}
 
 # variables
 variables = {'xvar': [#'Fa',
@@ -33,7 +33,7 @@ variables = {'xvar': [#'Fa',
 
 
 # data
-data = {'tower': 'Gingin',   # HowardSprings   AliceSpringsMulga
+data = {'tower': 'Calperum',   # HowardSprings   AliceSpringsMulga
         'yobs_file': 'L4',
         'file_suffix':'',
         'ancillary_files': [ ],
@@ -56,7 +56,7 @@ data = {'tower': 'Gingin',   # HowardSprings   AliceSpringsMulga
         'second_tower':'Gingin', #'TiTreeEast',
 
         'SOLO': False,
-        'path2solo': '/home/atbin/workd/SOLO/source',
+        'path2solo': '.',
 
        'fbprophet': False
         }

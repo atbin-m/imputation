@@ -12,18 +12,18 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
     """    
     # File configs
     if not data_in_path:
-        data_in_path = "../../data_in/"    
+        data_in_path = "data_in/"
     file_head = data_config['tower'] + '_'
     yobs_file = data_config['yobs_file']
     ancillary_files = data_config['ancillary_files']
 
     # Data variable configs
     yvar, tvar = vars_config['yvar'], vars_config['tvar']
-    
+
     ds = nc_read.nc_read_series(data_in_path + file_head + yobs_file + ".nc",
                                 checktimestep=True,
                                 fixtimestepmethod="r")
-    
+
     logging.info("Loading file: {}".format(data_in_path + file_head + 
                  yobs_file + ".nc"))
 
@@ -241,13 +241,13 @@ def data_preprocessing(data_config, vars_config,
             df['coswt'] = coswt
 
     if not data_out_path:
-        data_out_path = "../../data_out/"
+        data_out_path = "data_out/"
 
     df.to_csv(data_out_path + data_config['tower'] + '_' + yobs_file + 
               data_config['file_suffix'] + 
               '_processed.csv', index=False)
     
-    logging.info("Processed file saved at : {}".format("../../data_out/" + 
+    logging.info("Processed file saved at : {}".format("data_out/" +
                  data_config['tower'] + '_' + yobs_file +  
                  data_config['file_suffix'] + '_processed.csv'))
 
@@ -263,6 +263,7 @@ if __name__ == "__main__":
 
     import importlib
     importlib.reload(conf)
+
     data_config, var_config =  conf.data, conf.variables
     
     df = data_preprocessing(data_config, var_config)

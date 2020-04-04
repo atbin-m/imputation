@@ -74,7 +74,7 @@ def groups_of_train_test_set(df, config, fbprophet=None):
         raise ValueError("Time difference in days between begin and end date" + 
                          "must be greater than deltat.")
 
-   
+
     df = df.loc[df[tvar] <= end_date]
 
     number_of_train_test_sets = int((end_date - begin_date).total_seconds()/\

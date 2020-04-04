@@ -102,11 +102,10 @@ class Model_fit(object):
                                              self.xtest, 
                                              [self.pred_stats['rmse'],
                                               self.pred_stats['r2'],
-                                              self.pred_stats['mbe']], 
-                                             
+                                              self.pred_stats['mbe']],
                                              title)
         if config.result['save_plots'] == True:
-            filepath = '../../plot/'
+            filepath = 'plot/'
             plt.savefig(filepath + title + '.png')
             plt.close()
         return fig
@@ -226,19 +225,19 @@ class Model_runner(Model_fit):
                 '_%s'%self.conf.data['yobs_file'] + \
                  self.conf.data['file_suffix']
                  
-        fn = '../../data_out/' + title + '_summary_stats.csv'
+        fn = 'data_out/' + title + '_summary_stats.csv'
         return fn
     
     def _save_predicted_table(self):
         title = self.conf.data['tower']
         yobs_file = self.conf.data['yobs_file']
         
-        fn = '../../data_out/' + title + '_' + yobs_file + \
+        fn = 'data_out/' + title + '_' + yobs_file + \
         self.conf.data['file_suffix'] + '_imputed.csv'
         return fn
     
     def _merge_predicted_and_original_tables(self, impt_df):
-        original_df = pd.read_csv("../../data_out/" + 
+        original_df = pd.read_csv("data_out/" +
                                   self.conf.data['tower']  + '_' + \
                                   self.conf.data['yobs_file'] +\
                                  '_processed.csv', parse_dates=['DateTime'])
@@ -266,7 +265,7 @@ class Model_runner(Model_fit):
     def _make_taylor_diagram(self, samples,  refstd, srange, ttest_min):
         
         title = self.conf.data['tower'] + '_' +  ttest_min
-        fn = '../../plot/' + title
+        fn = 'plot/' + title
                         
         plot_utils.taylor_diagram(samples,  refstd, srange, title)    
 
