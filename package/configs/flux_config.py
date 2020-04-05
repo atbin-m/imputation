@@ -63,6 +63,7 @@ data = {'tower': 'Calperum',   # HowardSprings   AliceSpringsMulga
 
 # solvers
 solvers = [ 'Classical Linear',
+            'LSTM'
             #'Random Forest',
             #'eXtreme Gradient Boost',
             #'Support Vector Regression',
@@ -75,6 +76,6 @@ solvers = [ 'Classical Linear',
            ]
 
 # saving results
-result = {'save_plots':True,
+result = {'save_plots':False,
           'save_summary':True, 
           'save_imputed':True}

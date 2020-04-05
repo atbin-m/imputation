@@ -13,6 +13,7 @@ import xgboost
 from sklearn import neural_network as nn
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
+import rnn_lstm
 
 def model(solver):
     
@@ -69,8 +70,7 @@ def model(solver):
         parameters = {'C':[1, 10, 1e4], 
                       'gamma':[0.001, 0.01, 0.1]}
         model = SVR(kernel='rbf')
-        
-                
+
     elif solver=='nn':
         parameters = {'hidden_layer_sizes':[150, 250], 
                       'max_iter':[100,500]}
@@ -80,6 +80,11 @@ def model(solver):
         parameters = {'max_depth':[5, 10, 15], 'n_estimators':[250, 500, 1000]}
         #parameters = {'max_depth': [5], 'n_estimators': [250]}
         model = RandomForestRegressor(random_state=42)
+
+    elif solver=='lstm':
+        parameters = {'hidden_layer': 50, 'loss':'mae',
+                      'epochs':50, 'batch_size':40, 'len_input_sequence':1}
+        model = rnn_lstm.LSTM(parameters)
 
     else:
         raise ValueError('Unknown Solver Name.')

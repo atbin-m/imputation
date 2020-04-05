@@ -77,9 +77,6 @@ class ModelPipeline(object):
         fb = prophet.FBprophet(self.conf, self.df_imputed)
         fb._iterate_over_train_test_sets()
 
-    def lstm_run(self):
-        pass
-
     def taylor_diagram(self):
         summary_df, _ = self._read_summary_file()
         ttest_min_set = summary_df['Test_begin'].unique()

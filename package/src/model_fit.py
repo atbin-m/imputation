@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import test_list_of_models as lm
+import list_of_models as lm
 from sklearn import preprocessing
 import utils
 import logging
@@ -10,6 +10,7 @@ import plot_utils
 import matplotlib.pyplot as plt
 
 class Model_fit(object):
+
     def __init__(self, solver_name, ytrain, xtrain, ytest, xtest, ttest):
         self.solver_name = solver_name
         self.ytrain = ytrain
