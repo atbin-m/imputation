@@ -207,11 +207,18 @@ class TaylorDiagram(object):
         return contours
     
 
-def taylor_diagram(samples, refstd, srange, title):
+def taylor_diagram(samples, refstd=None, srange=None, title=None, dpi=95):
     """
     samples = [ Solvers X 3]
     """
-    fig = plt.figure(figsize=(8,8))
+    if refstd is None:
+        refstd = 0.75*samples[:,0].min()
+    if srange is None:
+        srange = (0, 1.5*samples[:,0].astype(float).max()/refstd)
+    if title is None:
+        title = 'Your figure title here'
+
+    fig = plt.figure(figsize=(8,8), dpi=dpi)
     fig.suptitle(title, size=12)
 
     # Taylor diagram

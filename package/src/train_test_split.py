@@ -1,5 +1,6 @@
 import datetime
 import pandas as pd
+import numpy as np
 import logging
 logging.basicConfig(format="%(lineno)s:%(funcName)s:%(message)s", 
                     level=logging.INFO)
@@ -114,18 +115,103 @@ def groups_of_train_test_set(df, config, fbprophet=None):
             test_df = pd.concat((test_df, i_test_set))
             train_df = pd.concat((train_df, i_train_set))
 
+
     return test_df, train_df
 
-if __name__=="__main__":
+
+def layer_train_test_set(df, config, missing_frac=0.5):
+    tvar = config.variables['tvar']
+    yvar = config.variables['yvar']
+
+    begin_date = config.timestamps['begin_date']
+    end_date = config.timestamps['end_date']
+    deltat =  config.timestamps['deltat']
+
+    begin_date = datetime.datetime.strptime(begin_date, "%Y-%m-%d %H:%M:%S")
+    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+
+    # Check if ustar threshold is provided for year of interest
+    if config.data['ustar'] == True:
+        if not begin_date.year in config.data['ustar_map'].keys():
+            raise ValueError('{} is missing from config/data/ustar_map'.format(begin_date.year))
+        if not end_date.year in config.data['ustar_map'].keys():
+            raise ValueError('{} is missing from config/data/ustar_map'.format(end_date.year))
+
+    if (end_date - begin_date).days < deltat:
+        raise ValueError("Gap between begin and end date must be greater than deltat.")
+
+    logging.info(f"Data used only between dates {begin_date} and {end_date} (both inclusive).")
+    df = df.loc[(df[tvar] <= end_date) & (df[tvar] >= begin_date)]
+
+    # Finding arbitrary test window of gap length = deltatdays
+    # If 50% of data is missing set new test start date.
+    number_of_missing_days = deltat
+    while number_of_missing_days > missing_frac*deltat:
+        test_end_day = pd.to_datetime('2100-01-01', format='%Y-%M-%d')  # arbitrarily large back date
+        while test_end_day > df[tvar].max():
+            test_start_day = pd.to_datetime(np.random.choice(df[tvar], 1)[0])
+            test_end_day = test_start_day + np.timedelta64(deltat, 'D')
+
+        test_df = df.loc[(df[tvar] >= test_start_day) &
+                         (df[tvar] <= test_end_day)].copy()
+        train_df = pd.concat([df.loc[df[tvar] < test_start_day],
+                              df.loc[df[tvar] > test_end_day]]).copy()
+
+        number_of_missing_days = test_df[test_df[yvar].isna()][tvar].map(lambda x: "%s-%s-%s"%(x.year, x.month, x.day) ).nunique()
+
+    logging.info(f'Test interval start: {test_start_day} end: {test_end_day}')
+
+
+    # Diving train into further train subsets for layer 1, layer 2 trainings
+    ntrain = train_df.shape[0]
+    ntrain_layer1_ = ntrain//2   #50% is train for layer 1
+    ntrain_layer2 = ntrain - ntrain_layer1_
+
+    # Further dividing ntrain_layer1 into 6 subsets
+    ntrain_subsets_layer1 = ntrain_layer1_//6
+    ntrain_layer1 = [ntrain_subsets_layer1]*5 + [ntrain_layer1_ - 5*ntrain_subsets_layer1]
+
+    ntrain_whole = ntrain_layer1 + [ntrain_layer2]
+
+    if sum(ntrain_whole) != ntrain:
+        raise ValueError('LHS!=RHS for train sample size')
+
+    train_labels = []
+    for i, j in zip(ntrain_whole,
+                    ['layer1_subset1', 'layer1_subset2', 'layer1_subset3',
+                     'layer1_subset4', 'layer1_subset5','layer1_subset6', 'layer2']):
+        train_labels.extend([j] * i)
+
+    np.random.shuffle(train_labels)
+
+    train_df['Set_rank'] = train_labels
+    test_df['Set_rank'] = 'test'
+
+    return test_df, train_df
+
+
+if __name__ == "__main__":
     import sys
-    sys.path.insert(0, 'configs/')
+    sys.path.insert(0, 'configs')
     import test_config as conf
     import pandas as pd
 
+    import importlib
+    importlib.reload(conf)
+
+    """
     try:
         df = pd.read_csv('../../data_out/Calperum_L3_processed.csv', parse_dates=['DateTime'])
     except FileNotFoundError:
         df = pd.read_csv('/media/atbin/Backup/Data_Processing/Package/data_out/Calperum_L3_processed.csv',
                          parse_dates=['DateTime'])
 
-    test, train = groups_of_train_test_set(df, conf, fbprophet=True)
+    test, train = groups_of_train_test_set(df, conf, fbprophet=False)
+    """
+
+    df = pd.read_csv('data_out/Gingin_L4_processed.csv', parse_dates=['DateTime'])
+    test, train = groups_of_train_test_set(df, conf)
+
+    #df = pd.read_csv('data_out/Gingin_L4_processed.csv', parse_dates=['DateTime'])
+    #test, train = layer_train_test_set(df, conf)
+

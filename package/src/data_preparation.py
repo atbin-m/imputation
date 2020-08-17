@@ -16,6 +16,7 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
     file_head = data_config['tower'] + '_'
     yobs_file = data_config['yobs_file']
     ancillary_files = data_config['ancillary_files']
+    supplement_xvar = data_config['supplement_xvar']
 
     # Data variable configs
     yvar, tvar = vars_config['yvar'], vars_config['tvar']
@@ -27,16 +28,12 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
     logging.info("Loading file: {}".format(data_in_path + file_head + 
                  yobs_file + ".nc"))
 
-   
-    #df = pd.DataFrame({yvar: ds.series[yvar]['Data'],
-    #                   tvar: ds.series[tvar]['Data']})
-    
-    df = pd.DataFrame({yvar: ds.series[yvar]['Data'],
-                       tvar: ds.series[tvar]['Data'], 
-                       'ustar': ds.series['ustar']['Data']})
-
     # Adding ustar_threshold information in the dataframe   
-    if data_config['ustar'] == True:        
+    if data_config['ustar'] == True:
+        df = pd.DataFrame({yvar: ds.series[yvar]['Data'],
+                           tvar: ds.series[tvar]['Data'],
+                           'ustar': ds.series['ustar']['Data']})
+
         df.ustar.replace({-9999.0: np.nan}, inplace=True)  
                 
         for year, uvalue_threshold in data_config['ustar_map'].items():
@@ -50,7 +47,11 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
             
             # Emptying yvar where yvar < ustar_threshold             
             df.loc[ustar_cut & year_cut & ~hour_cut, yvar] = -9999.0
-            
+
+    else:
+        df = pd.DataFrame({yvar: ds.series[yvar]['Data'],
+                           tvar: ds.series[tvar]['Data']})
+
     # Run when a list of ancillary files are provided
     if len(ancillary_files)>0:
             
@@ -71,6 +72,9 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
                 
             elif i=='BIOS2':
                 yvars = ['%s'%yvar]
+
+            elif i=='EVI':
+                yvars = ['EVI']
                             
             time = temp_ds.series[tvar]['Data']
             
@@ -83,14 +87,43 @@ def _primary_data_preprocessing(data_config, vars_config, data_in_path=None):
     
             df = pd.merge(df, temp_df, how='left', on=tvar, 
                           validate='one_to_one')
+
     # Run when no ancillary file is provided, e.g. in the case of L4
     else:
         xvars = vars_config['xvar']
         
         for j in xvars:
-            df[j] = ds.series[j]['Data']
+            try:
+                df[j] = ds.series[j]['Data']
+            except KeyError:
+                print(f'Variable {j} is not part of the {data_in_path}{file_head}{yobs_file}.nc file.')
+                continue
 
-    df.replace({-9999.0: np.nan}, inplace=True)    
+
+    if len(supplement_xvar) > 0:
+        supplement_file = supplement_xvar[0]
+
+        logging.info("Loading file: {}".format(data_in_path +
+                                               file_head + supplement_file + '.nc'))
+
+        temp_ds = nc_read.nc_read_series(data_in_path + file_head + supplement_file + '.nc',
+                                         checktimestep=True,
+                                         fixtimestepmethod="")
+
+        time = temp_ds.series[tvar]['Data']
+        temp_ = {tvar: time}
+
+        try:
+            temp_[supplement_file] = temp_ds.series[supplement_file]['Data']
+        except:
+            print('Supplement file and variable name must be the same.')
+
+        temp_df = pd.DataFrame(temp_)
+
+        df = pd.merge(df, temp_df, how='left', on=tvar,
+                      validate='one_to_one')
+
+    df.replace({-9999.0: np.nan}, inplace=True)
 
     return df
 
@@ -257,9 +290,8 @@ def data_preprocessing(data_config, vars_config,
 if __name__ == "__main__":
     import sys
     sys.path.insert(0, 'configs')
-    #import test_config as conf
-    import flux_config as conf
-    #import config_fluxes as conf
+    import test_config as conf
+    #import flux_config as conf
 
     import importlib
     importlib.reload(conf)

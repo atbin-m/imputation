@@ -5,7 +5,7 @@ Created on Sun Nov 25 08:42:33 2018
 @author: 22372102
 """
 
-from sklearn.svm import SVR 
+from sklearn.svm import SVR
 from sklearn.ensemble import GradientBoostingRegressor as GBR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import linear_model
@@ -16,6 +16,12 @@ from sklearn import neural_network as ann
 
 
 def model(solver):
+    """
+
+    :param solver: name of the solver
+    :param optimization: gridsearch, skopt  etc
+    :return:
+    """
     
     # Linear Models 
     if solver=='Classical Linear':
@@ -45,9 +51,9 @@ def model(solver):
 
     elif solver=='Random Forest':
         scale_data = False
-        parameters = {'max_depth':[5, 10], 'n_estimators':[500, 1000]}   # , 15 \\ 100, 
+        parameters = {'max_depth':[5, 10], 'n_estimators':[5, 10]}   # , 15 \\ 100,
         model = RandomForestRegressor(random_state= 42)
-        
+
     elif solver=='ridge':
         
         parameters = {'fit_intercept':[True, False], 'alpha':[0.01, 0.1, 1.0, 10.0], 'normalize':[True, False],
@@ -82,13 +88,13 @@ def model(solver):
                       'activation':['logistic', 'tanh', 'relu'], 
                       'alpha':[0.01, 0.001, 0.1]}
         scale_data = False 
-        model = ann.MLPRegressor() 
-            
+        model = ann.MLPRegressor()
+
     else:
         raise ValueError('Unknown Solver Name.')
-        
-    scores = None #['r2']
-    model = GridSearchCV(model, parameters, cv=2, scoring=scores,# n_jobs=-1,
+
+    scores = None  # ['r2']c
+    model = GridSearchCV(model, parameters, cv=2, scoring=scores,  # n_jobs=-1,
                          verbose=1)
-    
-    return model, scale_data
+
+    return model, parameters, scale_data

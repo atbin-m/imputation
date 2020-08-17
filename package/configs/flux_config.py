@@ -1,28 +1,30 @@
 # train test time-stamps
 timestamps = {'begin_date':'2013-03-03 00:00:00',
               'end_date':'2013-05-31 23:30:00',
-              'deltat':40}
+              'deltat':10,
+              'random_train_test_split':True}
 
 # variables
 variables = {'xvar': [#'Fa',
                       #'SHD',
-                      'Ta',
-                      'Ws',
-                      'Fg',
-                      #'VPD',
-                      'Fn',
-                      #'Fm',
-                      #'q',
-                      'Ts',
-                      #'Sws',
-                      #'Wd', 
+                      # 'Ta',
+                      # 'Ws',
+                      # 'Fg',
+                      # 'VPD',
+                      # 'Fn',
+                      # 'Fm',
+                      # 'q',
+                      # 'Ts',
+                      # 'Sws',
+                      #'EVI'
+                      #'Wd',
                       #'Flu',
                       #'Fsd',
                       #'Fsu',
                       #'RH',
                       #'ps'                      
                       ], 
-             'yvar': 'Fh',    # Driver name
+             'yvar': 'Fc',    # Driver name
              'tvar':'DateTime',
              'xvar_derived': [#'day', 'month', 'week', 
                               #'hour', 'minutes', 
@@ -33,8 +35,8 @@ variables = {'xvar': [#'Fa',
 
 
 # data
-data = {'tower': 'Calperum',   # HowardSprings   AliceSpringsMulga
-        'yobs_file': 'L4',
+data = {'tower': 'Gingin',   # HowardSprings   AliceSpringsMulga
+        'yobs_file': 'EVI',
         'file_suffix':'',
         'ancillary_files': [ ],
 

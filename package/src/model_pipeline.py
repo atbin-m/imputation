@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import prophet
 import numpy as np
 
+
 class ModelPipeline(object):
     def __init__(self, configuration):
         self.conf = configuration
@@ -20,8 +21,8 @@ class ModelPipeline(object):
         print('Imputing tower: {}'.format(self.conf.data['tower']))        
         # ------ Data Preprocessing
         print("Data preprocessing: start")
-        #df = data_preparation.data_preprocessing(data_config, var_config)
-        df = pd.read_csv('data_out/Calperum_L4_processed.csv', parse_dates=['DateTime'])
+        df = data_preparation.data_preprocessing(data_config, var_config)
+        #df = pd.read_csv('data_out/Calperum_L4_processed.csv', parse_dates=['DateTime'])
         print("Data preprocessing: end")
 
         if timeofday=='night':
@@ -190,59 +191,11 @@ if __name__=="__main__":
     #import driver_config as confs
 
     #L4 config
-    import flux_config as confs
+    import test_config as confs
     
     # --------------- full run --------------------------
     importlib.reload(confs)
     p = ModelPipeline(confs)
     p.imputation_run(timeofday=None)
-    
-    extra_solvers = []
-    if confs.data['PanelData']==True:
-          p.imputation_run_sec_tower()
-          p.panel_data_run()
-          extra_solvers = extra_solvers + ['Random Forest_Panel Data']
-    if confs.data['fbprophet'] == True:
-          p.fbprophet_run()
-          extra_solvers = extra_solvers + ['fbprophet']
-
     p.overall_rmse(extra_solvers)
     p.taylor_diagram()
-
-    """
-    # --------------- day run --------------------------
-    importlib.reload(confs)
-    confs.data['file_suffix'] = '_day'
-    p = ModelPipeline(confs)
-    p.imputation_run(timeofday='day')
-    
-    extra_solvers = []
-    if confs.data['PanelData']==True:
-          p.imputation_run_sec_tower()
-          p.panel_data_run()
-          extra_solvers = extra_solvers + ['Random Forest_Panel Data']
-    if confs.data['fbprophet'] == True:
-          p.fbprophet_run()
-          extra_solvers = extra_solvers + ['fbprophet']
-
-    p.overall_rmse(extra_solvers)
-    p.taylor_diagram()
-        
-    # --------------- night run --------------------------
-    importlib.reload(confs)
-    confs.data['file_suffix'] = '_night'
-    p = ModelPipeline(confs)
-    p.imputation_run(timeofday='night')
-    
-    extra_solvers = []
-    if confs.data['PanelData']==True:
-          p.imputation_run_sec_tower()
-          p.panel_data_run()
-          extra_solvers = extra_solvers + ['Random Forest_Panel Data']
-    if confs.data['fbprophet'] == True:
-          p.fbprophet_run()
-          extra_solvers = extra_solvers + ['fbprophet']
-
-    p.overall_rmse(extra_solvers)
-    p.taylor_diagram()
-    """

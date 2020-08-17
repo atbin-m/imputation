@@ -13,7 +13,7 @@ import xgboost
 from sklearn import neural_network as nn
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
-import rnn_lstm
+#import rnn_lstm
 
 def model(solver):
     
