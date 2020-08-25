@@ -35,7 +35,7 @@ logging.basicConfig(format="%(lineno)s:%(funcName)s:%(message)s",
 
 Xvar = conf.variables['xvar']
 yvar = conf.variables['yvar']
-frac = 0.48    #If missing data > 48 %, find a new test window
+frac = 0.6    #If missing data > 48 %, find a new test window
 
 # ----- Data preprocessing
 df = pd.read_csv('data_out/Gingin_L4_processed.csv',

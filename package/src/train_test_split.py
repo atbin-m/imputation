@@ -147,8 +147,10 @@ def layer_train_test_set(df, config, missing_frac=0.5):
     # If 50% of data is missing set new test start date.
     number_of_missing_days = deltat
     while number_of_missing_days > missing_frac*deltat:
+        print(f"Number of missing days {number_of_missing_days} > {int(missing_frac*deltat)} = ({missing_frac}*{deltat}).")
         test_end_day = pd.to_datetime('2100-01-01', format='%Y-%M-%d')  # arbitrarily large back date
         while test_end_day > df[tvar].max():
+            print('Gap condition not satisfied.')
             test_start_day = pd.to_datetime(np.random.choice(df[tvar], 1)[0])
             test_end_day = test_start_day + np.timedelta64(deltat, 'D')
 
