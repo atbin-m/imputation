@@ -14,12 +14,8 @@ from copy import deepcopy
 from skopt import gp_minimize
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
-from collections import defaultdict
-from skopt.plots import plot_convergence
 
 from keras.models import Sequential
-from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasRegressor
 from keras.layers import LSTM
 from keras.layers import Dense
 
@@ -35,19 +31,32 @@ logging.basicConfig(format="%(lineno)s:%(funcName)s:%(message)s",
 
 Xvar = conf.variables['xvar']
 yvar = conf.variables['yvar']
-frac = 0.6    #If missing data > 48 %, find a new test window
+frac = 0.7    #If missing data > 48 %, find a new test window
 
 # ----- Data preprocessing
 df = pd.read_csv('data_out/Gingin_L4_processed.csv',
                      parse_dates=['DateTime'])
 
-test_df, train_df = train_test_split.layer_train_test_set(df, conf, missing_frac=frac)
+test_df_, train_df_ = train_test_split.layer_train_test_set(df, conf, missing_frac=frac)
 
 # Combining data frame for scaling
-full_df = pd.concat([train_df, test_df])
+full_df = pd.concat([train_df_, test_df_])
 ymean, ystd = full_df[yvar].mean(), full_df[yvar].std()
-full_df[yvar] = (full_df[yvar] - ymean)/ystd
+yvar_val = full_df[yvar].values
+yvar_val = (yvar_val - ymean)/ystd
 yscale = (ymean, ystd)
+
+setrank = full_df['Set_rank'].values
+dtime = full_df['DateTime'].values
+
+scaler = StandardScaler()
+full_df = scaler.fit_transform(full_df[Xvar])
+full_df = pd.DataFrame.from_records(full_df, columns=Xvar)
+full_df['Set_rank'] = setrank
+full_df['DateTime'] = dtime
+full_df[yvar] = yvar_val
+
+full_df.sort_values('DateTime', inplace=True)
 
 # --------- Training
 # Layer 1 training parameters
@@ -243,7 +252,7 @@ for key in solvers_layer2:
 
 # ------- LSTM at layer 2 -------
 # LSTM -- Ensemble
-NSTEPS = 7
+NSTEPS = 5
 NFEATURES = X_train_pred_layer2.shape[1]
 
 # convert into input/output sequences
@@ -253,14 +262,12 @@ print(dataset_trainX.shape, dataset_trainy.shape)
 
 # define model
 model_lstm = Sequential()
-model_lstm.add(LSTM(5, input_shape=(NSTEPS, NFEATURES), activation='relu'))
-model_lstm.add(Dense(4, kernel_initializer='normal', activation='relu'))
-model_lstm.add(Dense(3, kernel_initializer='normal', activation='relu'))
+model_lstm.add(LSTM(5, input_shape=(NSTEPS, NFEATURES), activation='relu', dropout=0.5, recurrent_dropout=0.5))
 model_lstm.add(Dense(1, activation='linear'))
 model_lstm.compile(optimizer='adam', loss='mean_squared_error')
 history = model_lstm.fit(dataset_trainX, dataset_trainy,
                             validation_split=0.5, shuffle=False,
-                            epochs=100, batch_size=64, verbose=2)
+                            epochs=50, batch_size=32, verbose=2)
 
 dataset_test = np.column_stack((X_test_pred_layer2, y_test_layer2))
 dataset_testX, dataset_testy = utils.split_sequences(dataset_test, n_steps=NSTEPS)
@@ -328,7 +335,7 @@ for key in solvers_layer2:
     full_df.loc[test_filter, yvar + f'_predicted_test_single_{key}'] =  y_predicted_test * ystd + ymean
 
 # LSTM -- Single
-NSTEPS = 7
+NSTEPS = 5
 NFEATURES = Xtrain_bothlayers.shape[1]
 
 # convert into input/output sequences
@@ -338,14 +345,13 @@ print(dataset_trainX.shape, dataset_trainy.shape)
 
 # define model
 model_lstm = Sequential()
-model_lstm.add(LSTM(5, input_shape=(NSTEPS, NFEATURES), activation='relu'))
-model_lstm.add(Dense(4, kernel_initializer='normal', activation='relu'))
-model_lstm.add(Dense(3, kernel_initializer='normal', activation='relu'))
+model_lstm.add(LSTM(5, input_shape=(NSTEPS, NFEATURES), activation='relu', dropout=0.5, recurrent_dropout=0.5))
+#model_lstm.add(Dense(3, kernel_initializer='normal', activation='relu'))
 model_lstm.add(Dense(1, activation='linear'))
 model_lstm.compile(optimizer='adam', loss='mean_squared_error')
 history = model_lstm.fit(dataset_trainX, dataset_trainy,
                             validation_split=0.5, shuffle=False,
-                            epochs=100, batch_size=64, verbose=2)
+                            epochs=50, batch_size=32, verbose=2)
 
 dataset_test = np.column_stack((X_test, y_test))
 dataset_testX, dataset_testy = utils.split_sequences(dataset_test, n_steps=NSTEPS)

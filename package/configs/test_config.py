@@ -59,7 +59,7 @@ solvers = [ 'Classical Linear',
            ]
 
 solvers_layer1 = ['LGBM', 'RFE', 'SVM', 'GP', 'ANN', 'LASSO']
-solvers_layer2 = ['LGBM', 'RFE']
+solvers_layer2 = ['LGBM']#, 'RFE']
 
 # saving results
 result = {'save_plots':True,

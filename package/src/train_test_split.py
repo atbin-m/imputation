@@ -151,6 +151,7 @@ def layer_train_test_set(df, config, missing_frac=0.5):
         test_end_day = pd.to_datetime('2100-01-01', format='%Y-%M-%d')  # arbitrarily large back date
         while test_end_day > df[tvar].max():
             print('Gap condition not satisfied.')
+            np.random.seed(42)
             test_start_day = pd.to_datetime(np.random.choice(df[tvar], 1)[0])
             test_end_day = test_start_day + np.timedelta64(deltat, 'D')
 
