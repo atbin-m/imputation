@@ -33,9 +33,10 @@ Xvar = conf.variables['xvar']
 yvar = conf.variables['yvar']
 frac = 0.7    #If missing data > 48 %, find a new test window
 
+path_to_package = '/Users/pluto/Desktop/bag/tutoring/atbin/imputation/package/'
+
 # ----- Data preprocessing
-df = pd.read_csv('data_out/Gingin_L4_processed.csv',
-                     parse_dates=['DateTime'])
+df = pd.read_csv(path_to_package + 'data_out/Gingin_L4_processed.csv', parse_dates=['DateTime'])
 
 test_df_, train_df_ = train_test_split.layer_train_test_set(df, conf, missing_frac=frac)
 
@@ -388,9 +389,9 @@ for key in solvers_layer2:
         utils.SCORES['Layer2' + '_' + key + '_' + j] = all_scores
 
 score_df = pd.DataFrame.from_dict(utils.SCORES).T.round(3)
-score_df.to_csv('data_out/temp_full_score.csv', index_label='Models')
+score_df.to_csv(path_to_package + 'data_out/temp_full_score.csv', index_label='Models')
 
 # Scaling back yvar.
 full_df[yvar] = full_df[yvar] * ystd + ymean
-full_df.to_csv('data_out/temp_full.csv')
+full_df.to_csv(path_to_package + 'data_out/temp_full.csv')
 print(score_df)
