@@ -65,10 +65,6 @@ N_FOLDS = 3
 N_CALLS = 51
 THRESHOLD = 0.05
 
-N_FOLDS = 2
-N_CALLS = 11
-THRESHOLD = 0.1
-
 # List of models
 
 model_library = {
@@ -133,7 +129,6 @@ solvers_layer1 = conf.solvers_layer1
 solvers_layer2 = conf.solvers_layer2
 
 # -------- LAYER 1 Training ---------------------------------------
-"""
 for key in solvers_layer1:
     label = f'val_Layer1_{key}'
     val = deepcopy(model_library[key])
@@ -257,6 +252,10 @@ for key in solvers_layer2:
     full_df.loc[test_filter & (~full_df[yvar].isna()),
                 yvar + f'_predicted_test_ensemble_{key}'] =  y_predicted_test * ystd + ymean
 
+    # Prediction for all Xs
+    y_predicted_entire = cls.predict(full_df[Xvar_pred_test])
+    full_df[yvar + f'_predicted_for_allXs_ensemble_{key}'] = y_predicted_entire * ystd + ymean
+
 # ------- Single model run ------
 Xtrain_bothlayers = full_df.loc[(full_df['Set_rank'] != 'test') & (~full_df[yvar].isna()), Xvar]
 ytrain_bothlayers = full_df.loc[(full_df['Set_rank'] != 'test') & (~full_df[yvar].isna()), yvar]
@@ -305,6 +304,9 @@ for key in solvers_layer2:
     y_predicted_test = cls.predict(X_test)
     full_df.loc[test_filter, yvar + f'_predicted_test_single_{key}'] =  y_predicted_test * ystd + ymean
 
+    # Prediction for all Xs
+    y_predicted_entire = cls.predict(full_df[Xvar])
+    full_df[yvar + f'_predicted_for_allXs_single_{key}'] = y_predicted_entire * ystd + ymean
 
 # ---------- Summary stats -------------------
 ytest = full_df.loc[test_filter, yvar] * ystd + ymean
@@ -322,7 +324,7 @@ for key in solvers_layer2:
 
         utils.SCORES['Layer2' + '_' + key + '_' + j] = all_scores
 
-"""
+
 
 # LSTM runs ---------------------------------
 
@@ -464,6 +466,7 @@ yentire_ = full_lstm_df[new_yvar + '_scaled']
 dataset_entire_ = np.column_stack((Xentire_, yentire_))
 dataset_entireX_, _ = utils.split_sequences(dataset_entire_, NSTEPS)
 yhat_entire_ = model_lstm.predict(dataset_entireX_, verbose=0)
+yhat_entire_ = np.concatenate((np.array([np.nan]*(NSTEPS-1)), yhat_entire_.squeeze()))
 full_lstm_df[yvar + f'_predicted_for_allXs_LSTM'] = yhat_entire_
 
 # Scaling back yvar.

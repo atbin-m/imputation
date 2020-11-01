@@ -58,7 +58,7 @@ solvers = [ 'Classical Linear',
             #'elasticnet'
            ]
 
-solvers_layer1 = ['LGBM']#, 'RFE', 'SVM', 'GP', 'ANN', 'LASSO']
+solvers_layer1 = ['LGBM', 'RFE', 'SVM', 'GP', 'ANN', 'LASSO']
 solvers_layer2 = ['LGBM']#, 'RFE']
 
 # saving results
