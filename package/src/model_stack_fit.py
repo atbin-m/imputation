@@ -16,7 +16,7 @@ from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
 
 from keras.models import Sequential
-from keras.layers import LSTM
+from keras.layers import LSTM, Bidirectional
 from keras.layers import Dense
 
 import sys
@@ -65,6 +65,10 @@ N_FOLDS = 3
 N_CALLS = 51
 THRESHOLD = 0.05
 
+N_FOLDS = 2
+N_CALLS = 11
+THRESHOLD = 0.1
+
 # List of models
 
 model_library = {
@@ -74,7 +78,8 @@ model_library = {
                              Categorical(['regression'], name="objective"),
                              Integer(2, 10, name='min_data_in_leaf'),
                              Real(10 ** -4, 10 ** 0, "uniform", name='learning_rate'),
-                             Integer(100, 500, name='n_estimators')],
+                             Integer(100, 500, name='n_estimators')
+                             ],
             'model_instance': lgb.LGBMRegressor(),
             'data': 'subset1'},
 
@@ -83,7 +88,8 @@ model_library = {
             'params_space': [Integer(2, 25, name='max_depth'),
                              Integer(2, 15, name='min_samples_leaf'),
                              Integer(2, 15, name='min_samples_split'),
-                             Integer(100, 500, name='n_estimators')],
+                             Integer(100, 500, name='n_estimators')
+                           ],
             'model_instance': RandomForestRegressor(),
             'data': 'subset2'
         },
@@ -127,7 +133,7 @@ solvers_layer1 = conf.solvers_layer1
 solvers_layer2 = conf.solvers_layer2
 
 # -------- LAYER 1 Training ---------------------------------------
-
+"""
 for key in solvers_layer1:
     label = f'val_Layer1_{key}'
     val = deepcopy(model_library[key])
@@ -251,42 +257,6 @@ for key in solvers_layer2:
     full_df.loc[test_filter & (~full_df[yvar].isna()),
                 yvar + f'_predicted_test_ensemble_{key}'] =  y_predicted_test * ystd + ymean
 
-# ------- LSTM at layer 2 -------
-# LSTM -- Ensemble
-NSTEPS = 5
-NFEATURES = X_train_pred_layer2.shape[1]
-
-# convert into input/output sequences
-dataset_train = np.column_stack((X_train_pred_layer2, y_train_layer2))
-dataset_trainX, dataset_trainy = utils.split_sequences(dataset_train, NSTEPS)
-print(dataset_trainX.shape, dataset_trainy.shape)
-
-# define model
-model_lstm = Sequential()
-model_lstm.add(LSTM(5, input_shape=(NSTEPS, NFEATURES), activation='relu', dropout=0.5, recurrent_dropout=0.5))
-model_lstm.add(Dense(1, activation='linear'))
-model_lstm.compile(optimizer='adam', loss='mean_squared_error')
-history = model_lstm.fit(dataset_trainX, dataset_trainy,
-                            validation_split=0.5, shuffle=False,
-                            epochs=50, batch_size=32, verbose=2)
-
-dataset_test = np.column_stack((X_test_pred_layer2, y_test_layer2))
-dataset_testX, dataset_testy = utils.split_sequences(dataset_test, n_steps=NSTEPS)
-yhat_test = model_lstm.predict(dataset_testX, verbose=0)
-
-metric_lstm = utils.diagnostic_stats(dataset_testy*ystd + ymean,
-                                     yhat_test.squeeze()*ystd + ymean)
-
-yhat_test = np.concatenate((np.array([np.nan]*(NSTEPS-1)), yhat_test.squeeze()))
-
-full_df.loc[test_filter & (~full_df[yvar].isna()),
-            yvar + f'_predicted_test_ensemble_LSTM'] =  yhat_test * ystd + ymean
-
-utils.SCORES['Layer2' + '_' + 'LSTM' + '_' + 'ensemble'] = {'rmse':metric_lstm[0],
-                                                            'rsqr':metric_lstm[1],
-                                                            'mbe':metric_lstm[2],
-                                                            'corr':metric_lstm[3], 'stddev':metric_lstm[4]}
-
 # ------- Single model run ------
 Xtrain_bothlayers = full_df.loc[(full_df['Set_rank'] != 'test') & (~full_df[yvar].isna()), Xvar]
 ytrain_bothlayers = full_df.loc[(full_df['Set_rank'] != 'test') & (~full_df[yvar].isna()), yvar]
@@ -335,42 +305,6 @@ for key in solvers_layer2:
     y_predicted_test = cls.predict(X_test)
     full_df.loc[test_filter, yvar + f'_predicted_test_single_{key}'] =  y_predicted_test * ystd + ymean
 
-# LSTM -- Single
-NSTEPS = 5
-NFEATURES = Xtrain_bothlayers.shape[1]
-
-# convert into input/output sequences
-dataset_train = np.column_stack((Xtrain_bothlayers, ytrain_bothlayers))
-dataset_trainX, dataset_trainy = utils.split_sequences(dataset_train, NSTEPS)
-print(dataset_trainX.shape, dataset_trainy.shape)
-
-# define model
-model_lstm = Sequential()
-model_lstm.add(LSTM(5, input_shape=(NSTEPS, NFEATURES), activation='relu', dropout=0.5, recurrent_dropout=0.5))
-#model_lstm.add(Dense(3, kernel_initializer='normal', activation='relu'))
-model_lstm.add(Dense(1, activation='linear'))
-model_lstm.compile(optimizer='adam', loss='mean_squared_error')
-history = model_lstm.fit(dataset_trainX, dataset_trainy,
-                            validation_split=0.5, shuffle=False,
-                            epochs=50, batch_size=32, verbose=2)
-
-dataset_test = np.column_stack((X_test, y_test))
-dataset_testX, dataset_testy = utils.split_sequences(dataset_test, n_steps=NSTEPS)
-yhat_test = model_lstm.predict(dataset_testX, verbose=0)
-
-metric_lstm = utils.diagnostic_stats(dataset_testy*ystd + ymean,
-                                     yhat_test.squeeze()*ystd + ymean)
-
-yhat_test = np.concatenate((np.array([np.nan]*(NSTEPS-1)), yhat_test.squeeze()))
-
-full_df.loc[test_filter,
-            yvar + f'_predicted_test_single_LSTM'] = yhat_test * ystd + ymean
-
-utils.SCORES['Layer2' + '_' + 'LSTM' + '_' + 'single'] = {'rmse':metric_lstm[0],
-                                                          'rsqr':metric_lstm[1],
-                                                          'mbe':metric_lstm[2],
-                                                          'corr':metric_lstm[3],
-                                                          'stddev':metric_lstm[4]}
 
 # ---------- Summary stats -------------------
 ytest = full_df.loc[test_filter, yvar] * ystd + ymean
@@ -388,10 +322,154 @@ for key in solvers_layer2:
 
         utils.SCORES['Layer2' + '_' + key + '_' + j] = all_scores
 
+"""
+
+# LSTM runs ---------------------------------
+
+# Filling training gap with Primary Solver [LGBM]
+PRIMARY_SOLVER = ['LGBM']
+
+full_lstm_df = pd.concat([train_df_, test_df_])
+
+train_primary = train_df_[~train_df_[yvar].isna()]
+X_train_primary = train_primary[Xvar]
+y_train_primary = train_primary[yvar]
+
+for key in PRIMARY_SOLVER:
+    label = f'val_single_{key}'
+    val = deepcopy(model_library[key])
+    reg = val['model_instance']
+    params_space = val['params_space']
+
+    # Bayesian opt. part
+    @use_named_args(params_space)
+    def jth_objective(**params):
+        cls = reg.set_params(**params)
+        return utils.objective_core(cls, X_train_primary, y_train_primary,
+                                    label, [1,0],
+                                    nfolds=N_FOLDS, **params)
+
+
+    res = gp_minimize(jth_objective, params_space, n_calls=N_CALLS, random_state=0)
+    "Best score=%.4f" % res.fun
+
+    # Generating final optimized model instance
+    print("Optimal parameters")
+    params = {}
+    for param, value in zip(params_space, res.x):
+        print(f"Param: {param.name}, value: {value}")
+        params[param.name] = value
+
+    jth_model = reg.set_params(**params)
+    jth_model.fit(X_train_primary.values, y_train_primary.values)
+
+    # Model instance for ensemble
+    model_library[key]['model_instance_primary'] = jth_model
+
+# Predicting for entire X
+for key in PRIMARY_SOLVER:
+    val = model_library[key]
+    cls = val[f'model_instance_primary']
+    full_lstm_df['ytempall_predicted'] = cls.predict(full_lstm_df[Xvar])
+
+assert full_lstm_df['ytempall_predicted'].shape[0] == full_lstm_df.shape[0]
+
+
+# Labelling test as nan so that in next step we can predict for Xtest and gaps in X_train
+# at once.
+new_yvar = yvar + '_filled'
+
+full_lstm_df[new_yvar] = full_lstm_df[yvar].values
+full_lstm_test_filter = (full_lstm_df['Set_rank']=='test')
+full_lstm_df.loc[full_lstm_test_filter, new_yvar] = np.nan
+
+assert test_df_.shape[0] == full_lstm_df[full_lstm_test_filter].shape[0]
+
+full_lstm_df[new_yvar] = full_lstm_df[new_yvar].fillna(full_lstm_df['ytempall_predicted'])
+full_lstm_df.drop(columns={'ytempall_predicted'}, inplace=True)
+
+# Combining data frame for scaling
+ymean_lstm, ystd_lstm = full_lstm_df[new_yvar].mean(), full_lstm_df[new_yvar].std()
+yvar_val = full_lstm_df[new_yvar].values
+yvar_val = (yvar_val - ymean_lstm)/ystd_lstm
+yscale_lstm = (ymean_lstm, ystd_lstm)
+
+
+dtime = full_lstm_df['DateTime'].values
+set_rank = full_lstm_df['Set_rank'].values
+
+scaler = StandardScaler()
+full_lstm_df = scaler.fit_transform(full_lstm_df[Xvar])
+full_lstm_df = pd.DataFrame.from_records(full_lstm_df, columns=Xvar)
+full_lstm_df['DateTime'] = dtime
+full_lstm_df['Set_rank'] = set_rank
+full_lstm_df[new_yvar + '_scaled'] = yvar_val
+full_lstm_df.sort_values('DateTime', inplace=True)
+
+
+# Secondary solver LSTM run------
+Xtrain_ = full_lstm_df.loc[full_lstm_df['Set_rank']!='test', Xvar]
+ytrain_ = full_lstm_df.loc[full_lstm_df['Set_rank']!='test', new_yvar + '_scaled']
+
+Xtest_ = full_lstm_df.loc[full_lstm_df['Set_rank']=='test', Xvar]
+ytest_ = full_lstm_df.loc[full_lstm_df['Set_rank']=='test', new_yvar + '_scaled']
+
+print('Train data:', Xtrain_.shape, ytrain_.shape)
+print('Test data:', Xtest_.shape, ytest_.shape)
+
+
+# LSTM -- Single
+NSTEPS = 5
+NFEATURES = Xtrain_.shape[1]
+
+# convert into input/output sequences
+dataset_train = np.column_stack((Xtrain_, ytrain_))
+dataset_trainX, dataset_trainy = utils.split_sequences(dataset_train, NSTEPS)
+print(dataset_trainX.shape, dataset_trainy.shape)
+
+# define model
+model_lstm = Sequential()
+model_lstm.add(Bidirectional(LSTM(5, input_shape=(NSTEPS, NFEATURES), activation='relu', dropout=0.5, recurrent_dropout=0.5)))
+model_lstm.add(Dense(1, activation='linear'))
+model_lstm.compile(optimizer='adam', loss='mean_squared_error')
+history = model_lstm.fit(dataset_trainX, dataset_trainy,
+                            validation_split=0.5, shuffle=False,
+                            epochs=50, batch_size=32, verbose=2)
+
+dataset_test = np.column_stack((Xtest_, ytest_))
+dataset_testX, dataset_testy = utils.split_sequences(dataset_test, n_steps=NSTEPS)
+yhat_test = model_lstm.predict(dataset_testX, verbose=0)
+
+metric_lstm = utils.diagnostic_stats(dataset_testy*ystd_lstm + ymean_lstm,
+                                     yhat_test.squeeze()*ystd_lstm + ymean_lstm)
+
+utils.SCORES['LSTM' + '_' + 'single'] = {'rmse':metric_lstm[0],
+                                          'rsqr':metric_lstm[1],
+                                          'mbe':metric_lstm[2],
+                                          'corr':metric_lstm[3],
+                                          'stddev':metric_lstm[4]}
+
 score_df = pd.DataFrame.from_dict(utils.SCORES).T.round(3)
 score_df.to_csv(path_to_package + 'data_out/temp_full_score.csv', index_label='Models')
+print(score_df)
+
+yhat_test = np.concatenate((np.array([np.nan]*(NSTEPS-1)), yhat_test.squeeze()))
+
+full_lstm_df[yvar + f'_predicted_test_filled_LSTM'] = np.nan
+full_lstm_df.loc[full_lstm_df['Set_rank']=='test', yvar + f'_predicted_test_filled_LSTM'] = yhat_test * ystd_lstm + ymean_lstm
+
+# Predicting for the entire dataset
+Xentire_ = full_lstm_df[Xvar]
+yentire_ = full_lstm_df[new_yvar + '_scaled']
+dataset_entire_ = np.column_stack((Xentire_, yentire_))
+dataset_entireX_, _ = utils.split_sequences(dataset_entire_, NSTEPS)
+yhat_entire_ = model_lstm.predict(dataset_entireX_, verbose=0)
+full_lstm_df[yvar + f'_predicted_for_allXs_LSTM'] = yhat_entire_
 
 # Scaling back yvar.
-full_df[yvar] = full_df[yvar] * ystd + ymean
-full_df.to_csv(path_to_package + 'data_out/temp_full.csv')
-print(score_df)
+# Merging LSTM results with ensemble
+final_df = pd.merge(full_df, full_lstm_df[['DateTime', yvar + '_filled_scaled', yvar + '_predicted_test_filled_LSTM',
+                                           yvar + f'_predicted_for_allXs_LSTM']],
+                    on ='DateTime', how='left')
+final_df[yvar] = final_df[yvar] * ystd + ymean
+final_df.to_csv(path_to_package + 'data_out/temp_full.csv')

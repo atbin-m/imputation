@@ -16,7 +16,7 @@ variables = {'xvar': ['Ta', 'Ws', 'Fg', 'VPD', 'Fn', 'q', 'Ts', 'Sws', 'EVI'],
             }
 
 # data
-data = {'tower': 'Gingin',
+data = {'tower': 'HowardSprings',
         'yobs_file': 'L4',
         'file_suffix':'',
         'ancillary_files': [],
@@ -58,7 +58,7 @@ solvers = [ 'Classical Linear',
             #'elasticnet'
            ]
 
-solvers_layer1 = ['LGBM', 'RFE', 'SVM', 'GP', 'ANN', 'LASSO']
+solvers_layer1 = ['LGBM']#, 'RFE', 'SVM', 'GP', 'ANN', 'LASSO']
 solvers_layer2 = ['LGBM']#, 'RFE']
 
 # saving results

@@ -151,7 +151,6 @@ def layer_train_test_set(df, config, missing_frac=0.5):
         test_end_day = pd.to_datetime('2100-01-01', format='%Y-%M-%d')  # arbitrarily large back date
         while test_end_day > df[tvar].max():
             print('Gap condition not satisfied.')
-            np.random.seed(42)
             test_start_day = pd.to_datetime(np.random.choice(df[tvar], 1)[0])
             test_end_day = test_start_day + np.timedelta64(deltat, 'D')
 
@@ -163,7 +162,6 @@ def layer_train_test_set(df, config, missing_frac=0.5):
         number_of_missing_days = test_df[test_df[yvar].isna()][tvar].map(lambda x: "%s-%s-%s"%(x.year, x.month, x.day) ).nunique()
 
     logging.info(f'Test interval start: {test_start_day} end: {test_end_day}')
-
 
     # Diving train into further train subsets for layer 1, layer 2 trainings
     ntrain = train_df.shape[0]
