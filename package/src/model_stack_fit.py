@@ -183,6 +183,8 @@ X_train_layer2 = full_df.loc[layer2_filter & (~full_df[yvar].isna()), Xvar]
 test_filter = (full_df['Set_rank']=='test')
 X_test_layer2 = full_df.loc[test_filter & (~full_df[yvar].isna()), Xvar]
 
+X_all_layer2 = full_df[Xvar]
+
 # Saving prediction for layer 2 using model trained on layer 1
 for key in solvers_layer1:
     val = model_library[key]
@@ -197,9 +199,11 @@ for key in solvers_layer1:
     full_df.loc[test_filter & (~full_df[yvar].isna()),
                 yvar + f'_predicted_test_{key}'] = y_pred_test #* ystd + ymean
 
+    # Prediction for all Xs
+    y_predicted_entire = reg.predict(X_all_layer2)
+    full_df[yvar + f'_predicted_layer2_Xs_all_ensemble_{key}'] = y_predicted_entire
 
 # ---------------------- Layer 2 training
-
 Xvar_pred_layer2 = [yvar + f'_predicted_layer2_{j}' for j in solvers_layer1]
 X_train_pred_layer2 = full_df.loc[layer2_filter & (~full_df[yvar].isna()), Xvar_pred_layer2]
 y_train_layer2 = full_df.loc[layer2_filter & (~full_df[yvar].isna()), yvar]
@@ -244,6 +248,9 @@ Xvar_pred_test = [yvar + f'_predicted_test_{j}' for j in solvers_layer1]
 X_test_pred_layer2 = full_df.loc[test_filter & (~full_df[yvar].isna()), Xvar_pred_test]
 y_test_layer2 = full_df.loc[test_filter & (~full_df[yvar].isna()), yvar]
 
+Xvar_all_pred_layer2 = [yvar + f'_predicted_layer2_Xs_all_ensemble_{key}' for j in solvers_layer1]
+X_all_pred_layer2 = full_df[Xvar_all_pred_layer2]
+
 # Prediction
 for key in solvers_layer2:
     val = model_library[key]
@@ -253,8 +260,9 @@ for key in solvers_layer2:
                 yvar + f'_predicted_test_ensemble_{key}'] =  y_predicted_test * ystd + ymean
 
     # Prediction for all Xs
-    y_predicted_entire = cls.predict(full_df[Xvar_pred_test])
-    full_df[yvar + f'_predicted_for_allXs_ensemble_{key}'] = y_predicted_entire * ystd + ymean
+    y_predicted_entire = cls.predict(X_all_pred_layer2)
+    full_df[yvar + f'_predicted_for_allXs_ensemble_{key}'] = y_predicted_entire
+
 
 # ------- Single model run ------
 Xtrain_bothlayers = full_df.loc[(full_df['Set_rank'] != 'test') & (~full_df[yvar].isna()), Xvar]
