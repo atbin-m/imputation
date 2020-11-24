@@ -36,7 +36,9 @@ frac = 0.7    #If missing data > 48 %, find a new test window
 path_to_package = '/Users/pluto/Desktop/bag/tutoring/atbin/imputation/package/'
 
 # ----- Data preprocessing
-df = pd.read_csv(path_to_package + 'data_out/Gingin_L4_processed.csv', parse_dates=['DateTime'])
+tower_header = conf.data['tower'] + '_' + conf.data['yobs_file'] + conf.data['file_suffix']
+
+df = pd.read_csv(path_to_package + f'data_out/{tower_header}_processed.csv', parse_dates=['DateTime'])
 
 test_df_, train_df_ = train_test_split.layer_train_test_set(df, conf, missing_frac=frac)
 
