@@ -1,6 +1,6 @@
 # train test time-stamps
-timestamps = {'begin_date':'2013-03-03 00:00:00',
-              'end_date':'2013-07-31 23:30:00',
+timestamps = {'begin_date':'2009-01-01 00:00:00',
+              'end_date':'2013-12-31 23:30:00',
               'deltat':30,
               'random_train_test_split':False}
 
@@ -16,9 +16,9 @@ variables = {'xvar': ['Ta', 'Ws', 'Fg', 'VPD', 'Fn', 'q', 'Ts', 'Sws', 'EVI'],
             }
 
 # data
-data = {'tower': 'HowardSprings',
+data = {'tower': 'Calperum', # HowardSprings, Calperum, Tumbarumba, Gingin
         'yobs_file': 'L4',
-        'file_suffix':'',
+        'file_suffix':'_Fc',
         'ancillary_files': [],
         'supplement_xvar': ['EVI'],
 
